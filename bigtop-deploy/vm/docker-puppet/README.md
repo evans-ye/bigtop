@@ -48,8 +48,7 @@ vagrant plugin install vagrant-cachier
 5) Build up a centos 6.4 image supports ssh, scp and sudo required by vagrant
 
 ```
-docker pull bigtop/puppet:centos-6.4
-docker build -t centos:6.4-ssh .
+docker build -t bigtop/ssh:centos-6.4 .
 ```
 
 6) To provision a 3 node Apache Hadoop cluster on top of docker containers
