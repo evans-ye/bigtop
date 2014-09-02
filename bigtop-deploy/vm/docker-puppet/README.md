@@ -25,41 +25,40 @@ This cluster can be used:
 - to test bigtop smoke tests
 - to test bigtop puppet recipes
 
-## Preparation for non-Linux platform
+## Preparation
 
-- OS X: install [boot2docker](https://docs.docker.com/installation/mac/)
-- Windows: Prepare a linux VM that supports docker(Since windows do not have docker client, you need to ship following works in-side the VM)
+1) Prepare a Linux environment with [docker](https://docs.docker.com/installation/#installation) installed
 
-## USAGE
+2) Install [Vagrant](https://www.vagrantup.com/downloads.html)
 
-1) Install [Vagrant](https://www.vagrantup.com/downloads.html)
-
-2) Install [vagrant-hostmanager plugin](https://github.com/smdahlen/vagrant-hostmanager) to better manage `/etc/hosts`
+3) Install [vagrant-hostmanager plugin](https://github.com/smdahlen/vagrant-hostmanager) to better manage `/etc/hosts`
 
 ```
 vagrant plugin install vagrant-hostmanager
 ```
 
-3) Install [vagrant-cachier plugin](https://github.com/fgrehm/vagrant-cachier) to cache packages at local
+4) Install [vagrant-cachier plugin](https://github.com/fgrehm/vagrant-cachier) to cache packages at local
 
 ```
 vagrant plugin install vagrant-cachier
 ```
 
-4) Build up a centos 6.4 image supports ssh, scp and sudo required by vagrant
+## USAGE
+
+5) Build up a centos 6.4 image supports ssh, scp and sudo required by vagrant
 
 ```
 docker pull bigtop/puppet:centos-6.4
 docker build -t centos:6.4-ssh .
 ```
 
-5) To provision a 3 node Apache Hadoop cluster on top of docker containers
+6) To provision a 3 node Apache Hadoop cluster on top of docker containers
 
 ```
 vagrant up --provision-with shell,hostmanager && vagrant provision --provision-with puppet
 ```
 
-5) You can specify number of nodes you'd like to provision by modifying `num_instances` in Vagrantfile
+7) You can specify number of nodes you'd like to provision by modifying `num_instances` in Vagrantfile
 
 ```
 num_instances = 5
@@ -67,7 +66,7 @@ num_instances = 5
 
 ##Example:
 
-6) Run hbase-test.sh to evaluate the deployment.
+8) Run hbase-test.sh to evaluate the deployment.
 
 ##Configure Apache Hadoop ecosystem components
 * Choose the ecosystem you want to be deployed by modifying components in provision.sh.
