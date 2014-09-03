@@ -21,7 +21,7 @@ ENV['VAGRANT_DEFAULT_PROVIDER'] ||= 'docker'
 VAGRANTFILE_API_VERSION = "2"
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # number of instances
-  $num_instances = 4
+  $num_instances = 3
 
   # the bigtop puppet recipes
   $bigtop_puppet = "../../puppet"
