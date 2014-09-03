@@ -74,6 +74,10 @@ num_instances = 5
 
 9) Run hbase-test.sh to evaluate the deployment.
 
+```
+../vagrant-puppet/hbase-test.sh
+```
+
 ##Configure Apache Hadoop ecosystem components
 * Choose the ecosystem you want to be deployed by modifying components in provision.sh.
 
@@ -86,4 +90,6 @@ See `bigtop-deploy/puppet/config/site.csv.example` for more details.
 
 ##Note:
 
-For bigtop 0.7.0 code base, you must change the value of the [yarn-site.xml](https://github.com/apache/bigtop/blob/master/bigtop-deploy/puppet/modules/hadoop/templates/yarn-site.xml) yarn.nodemanager.aux.services from "mapreduce_shuffle" to "mapreduce.shuffle" before `vagrant up`
+* For bigtop 0.7.0 code base, you must change the value of the [yarn-site.xml](https://github.com/apache/bigtop/blob/master/bigtop-deploy/puppet/modules/hadoop/templates/yarn-site.xml) yarn.nodemanager.aux.services from "mapreduce_shuffle" to "mapreduce.shuffle" before `vagrant up`
+
+* Users currently using vagrant 1.6+ is strongly recommanded to upgrade to 1.6.4+, otherwise you will encounter the [issue](https://github.com/mitchellh/vagrant/issues/3769) when installing plguins
