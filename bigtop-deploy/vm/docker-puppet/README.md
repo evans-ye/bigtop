@@ -48,6 +48,8 @@ vagrant plugin install vagrant-cachier
 5) Build up a centos 6.4 image supports ssh, scp and sudo required by vagrant
 
 ```
+git clone https://github.com/apache/bigtop.git
+cd bigtop/bigtop-deploy/vm/docker-puppet
 docker build -t bigtop/ssh:centos-6.4 .
 ```
 
