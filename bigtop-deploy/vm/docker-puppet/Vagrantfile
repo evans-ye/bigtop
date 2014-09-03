@@ -21,57 +21,52 @@ ENV['VAGRANT_DEFAULT_PROVIDER'] ||= 'docker'
 VAGRANTFILE_API_VERSION = "2"
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # number of instances
-  num_instances = 3
+  $num_instances = 4
 
   # the bigtop puppet recipes
-  bigtop_puppet = "../../puppet"
+  $bigtop_puppet = "../../puppet"
 
   # use vagrant-cachier to cache packages at local(https://github.com/fgrehm/vagrant-cachier)
   if Vagrant.has_plugin?("vagrant-cachier")
     config.cache.scope = :box
   end
 
-  # declare the variable first, will be override in following loop
-  bigtop_master = ""
-
   # nodes definition
-  (1..num_instances).each do |i|
+  (1..$num_instances).each do |i|
     config.vm.define "bigtop#{i}" do |bigtop|
 
-      bigtop_hostname="bigtop#{i}.docker"
+      $bigtop_hostname="bigtop#{i}.docker"
       if "#{i}" == "1"
-        bigtop_master = bigtop_hostname
+        $bigtop_master = $bigtop_hostname
       end
 
       bigtop.vm.provider "docker" do |d|
-        d.image = "centos:6.4-ssh"
+        d.image = "bigtop/ssh:centos-6.4"
 	d.name = "bigtop#{i}"
-        d.create_args = ["-t","-i","--privileged","-m","3000m"]
+        d.privileged = true
         if "#{i}" == "1"
 	  d.ports = ["50070:50070","8088:8088","60010:60010"]
         end
-        #d.cmd = ["/sbin/my_init"]
 	d.has_ssh = true
       end
 
       bigtop.ssh.username = "root"
       bigtop.ssh.port = 22
-      bigtop.ssh.pty = true
-      bigtop.vm.hostname = bigtop_hostname
-      bigtop.vm.synced_folder bigtop_puppet, "/bigtop-puppet"
+      bigtop.vm.hostname = $bigtop_hostname
+      bigtop.vm.synced_folder $bigtop_puppet, "/bigtop-puppet"
 
       # shell provisioner to setup basic vm environment
       bigtop.vm.provision :shell do |shell|
         shell.path = "provision.sh"
-        shell.args = bigtop_master + " " + bigtop_hostname
+        shell.args = $bigtop_master + " " + $bigtop_hostname
       end
 
       bigtop.vm.provision :hostmanager
 
       # deploy Apache Hadoop and it's ecosystem
       bigtop.vm.provision :puppet do |puppet|
-        puppet.module_path = bigtop_puppet + "/modules"
-        puppet.manifests_path = bigtop_puppet + "/manifests"
+        puppet.module_path = $bigtop_puppet + "/modules"
+        puppet.manifests_path = $bigtop_puppet + "/manifests"
         puppet.manifest_file  = "site.pp"
         puppet.options = "--debug --confdir=/bigtop-puppet"
       end
