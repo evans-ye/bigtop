@@ -45,21 +45,26 @@ vagrant plugin install vagrant-cachier
 
 ## USAGE
 
-5) Build up a centos 6.4 image supports ssh, scp and sudo required by vagrant
+5) Get bigtop source code ready
 
 ```
 git clone https://github.com/apache/bigtop.git
 cd bigtop/bigtop-deploy/vm/docker-puppet
+```
+
+6) Build up a centos 6.4 image supports ssh, scp and sudo required by vagrant
+
+```
 docker build -t bigtop/ssh:centos-6.4 .
 ```
 
-6) To provision a 3 node Apache Hadoop cluster on top of docker containers
+7) To provision a 3 node Apache Hadoop cluster on top of docker containers
 
 ```
 vagrant up --no-provision && vagrant provision
 ```
 
-7) You can specify number of nodes you'd like to provision by modifying `num_instances` in Vagrantfile
+8) You can specify number of nodes you'd like to provision by modifying `num_instances` in Vagrantfile
 
 ```
 num_instances = 5
@@ -67,7 +72,7 @@ num_instances = 5
 
 ##Example:
 
-8) Run hbase-test.sh to evaluate the deployment.
+9) Run hbase-test.sh to evaluate the deployment.
 
 ##Configure Apache Hadoop ecosystem components
 * Choose the ecosystem you want to be deployed by modifying components in provision.sh.
