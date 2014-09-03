@@ -54,7 +54,7 @@ docker build -t bigtop/ssh:centos-6.4 .
 6) To provision a 3 node Apache Hadoop cluster on top of docker containers
 
 ```
-vagrant up --provision-with shell,hostmanager && vagrant provision --provision-with puppet
+vagrant up --no-provision && vagrant provision
 ```
 
 7) You can specify number of nodes you'd like to provision by modifying `num_instances` in Vagrantfile
