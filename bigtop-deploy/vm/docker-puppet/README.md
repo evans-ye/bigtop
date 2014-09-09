@@ -27,20 +27,20 @@ This cluster can be used:
 
 ## Preparation
 
-1) Prepare a Linux environment with [docker](https://docs.docker.com/installation/#installation) installed
+1) Prepare a Linux environment with [docker](https://docs.docker.com/installation/#installation) installed(currently this recipe supports Linux host only)
 
 2) Install [Vagrant](https://www.vagrantup.com/downloads.html)
 
 3) Install [vagrant-hostmanager plugin](https://github.com/smdahlen/vagrant-hostmanager) to better manage `/etc/hosts`
 
 ```
-vagrant plugin install vagrant-hostmanager
+sudo vagrant plugin install vagrant-hostmanager
 ```
 
 4) Install [vagrant-cachier plugin](https://github.com/fgrehm/vagrant-cachier) to cache packages at local
 
 ```
-vagrant plugin install vagrant-cachier
+sudo vagrant plugin install vagrant-cachier
 ```
 
 ## USAGE
@@ -55,13 +55,13 @@ cd bigtop/bigtop-deploy/vm/docker-puppet
 6) Build up a centos 6.4 image supports ssh, scp and sudo required by vagrant
 
 ```
-docker build -t bigtop/ssh:centos-6.4 .
+sudo docker build -t bigtop/ssh:centos-6.4 .
 ```
 
 7) To provision a 3 node Apache Hadoop cluster on top of docker containers
 
 ```
-vagrant up --no-provision && vagrant provision
+sudo (vagrant up --no-provision && vagrant provision)
 ```
 
 8) You can specify number of nodes you'd like to provision by modifying `num_instances` in Vagrantfile

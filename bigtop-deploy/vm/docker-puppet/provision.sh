@@ -17,7 +17,7 @@
 
 # Install puppet agent
 yum -y install http://yum.puppetlabs.com/puppetlabs-release-el-6.noarch.rpm
-yum -y install puppet-2.7.23-1.el6.noarch
+yum -y install puppet-2.7.24-1.el6.noarch
 
 # Unmount device /etc/hosts and use hostmanager to manage hosts
 umount /etc/hosts
@@ -34,8 +34,8 @@ EOF
 
 mkdir -p /data/{1,2}
 
-## Setup rng-tools to improve virtual machine entropy performance.
-## The poor entropy performance will cause kerberos provisioning failed.
-#yum -y install rng-tools
-#sed -i.bak 's/EXTRAOPTIONS=\"\"/EXTRAOPTIONS=\"-r \/dev\/urandom\"/' /etc/sysconfig/rngd
-#service rngd start
+# Setup rng-tools to improve virtual machine entropy performance.
+# The poor entropy performance will cause kerberos provisioning failed.
+yum -y install rng-tools
+sed -i.bak 's/EXTRAOPTIONS=\"\"/EXTRAOPTIONS=\"-r \/dev\/urandom\"/' /etc/sysconfig/rngd
+service rngd start

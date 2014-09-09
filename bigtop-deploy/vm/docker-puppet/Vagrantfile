@@ -31,6 +31,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     config.cache.scope = :box
   end
 
+  # declare the variable first, will be override in following loop
+  $bigtop_master = ""
+
   # nodes definition
   (1..$num_instances).each do |i|
     config.vm.define "bigtop#{i}" do |bigtop|
@@ -40,6 +43,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         $bigtop_master = $bigtop_hostname
       end
 
+      # docker container settings
       bigtop.vm.provider "docker" do |d|
         d.image = "bigtop/ssh:centos-6.4"
 	d.name = "bigtop#{i}"
