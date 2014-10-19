@@ -45,17 +45,6 @@ destroy() {
     rm -f ./hosts
 }
 
-destroy-all() {
-    while true; do
-        read -p "Do you really want to continue?(Y/n)" yn
-        case $yn in
-            [Y]* ) break;;
-            [n]* ) exit;;
-            * ) echo "Please answer Y or n.";;
-        esac
-    done
-}
-
 bigtop-puppet() {
     echo "puppet apply -d --confdir=/bigtop-puppet --modulepath=/bigtop-puppet/modules /bigtop-puppet/manifests/site.pp" |vagrant ssh $1
 }
