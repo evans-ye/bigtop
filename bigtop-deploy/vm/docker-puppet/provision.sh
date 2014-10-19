@@ -19,15 +19,19 @@
 yum -y install http://yum.puppetlabs.com/puppetlabs-release-el-6.noarch.rpm
 yum -y install puppet-2.7.24-1.el6.noarch
 
-# Unmount device /etc/hosts and use hostmanager to manage hosts
+sysctl kernel.hostname=`hostname -f`
+
+# Unmount device /etc/hosts and replace it by a shared hosts file
+echo -e "`hostname -i`\t`hostname -f`" >> /vagrant/hosts
 umount /etc/hosts
-sysctl kernel.hostname=$2
+mv /etc/hosts /etc/hosts.bak
+ln -s /vagrant/hosts /etc/hosts
 
 # Prepare puppet configuration file
 cat > /bigtop-puppet/config/site.csv << EOF
 hadoop_head_node,$1
 hadoop_storage_dirs,/data/1,/data/2
-bigtop_yumrepo_uri,http://bigtop.s3.amazonaws.com/releases/0.7.0/redhat/6/x86_64
+bigtop_yumrepo_uri,http://bigtop01.cloudera.org:8080/view/Releases/job/Bigtop-0.8.0/label=centos6/6/artifact/output/
 jdk_package_name,java-1.7.0-openjdk-devel.x86_64
 components,hadoop,hbase,yarn,mapred-app
 EOF

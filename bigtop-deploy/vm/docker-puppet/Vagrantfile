@@ -16,64 +16,51 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+require 'fileutils'
+
+# number of instances
+$num_instances = 3
+# the bigtop puppet recipes
+$bigtop_puppet = "../../puppet"
+
+# load configuration from config.rb
+CONFIG = File.join(File.dirname(__FILE__), "config.rb")
+if File.exist?(CONFIG)
+  require CONFIG
+end
+
 ENV['VAGRANT_DEFAULT_PROVIDER'] ||= 'docker'
 
 VAGRANTFILE_API_VERSION = "2"
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
-  # number of instances
-  $num_instances = 3
 
-  # the bigtop puppet recipes
-  $bigtop_puppet = "../../puppet"
-
-  # use vagrant-cachier to cache packages at local(https://github.com/fgrehm/vagrant-cachier)
-  if Vagrant.has_plugin?("vagrant-cachier")
-    config.cache.scope = :box
+  # image definition
+  config.vm.define "image", autostart: false do |image|
+    image.vm.provider "docker" do |d|
+      d.build_dir = "."
+      d.build_args = ["-t","bigtop/ssh:centos-6.4"]
+      d.vagrant_machine = "boot2docker"
+      d.vagrant_vagrantfile = "./boot2docker/Vagrantfile"
+    end
   end
-
-  # declare the variable first, will be override in following loop
-  $bigtop_master = ""
 
   # nodes definition
   (1..$num_instances).each do |i|
     config.vm.define "bigtop#{i}" do |bigtop|
-
-      $bigtop_hostname="bigtop#{i}.docker"
-      if "#{i}" == "1"
-        $bigtop_master = $bigtop_hostname
-      end
-
       # docker container settings
       bigtop.vm.provider "docker" do |d|
         d.image = "bigtop/ssh:centos-6.4"
-	d.name = "bigtop#{i}"
-        d.privileged = true
+	d.create_args = ["--privileged=true"]
         if "#{i}" == "1"
 	  d.ports = ["50070:50070","8088:8088","60010:60010"]
         end
-	d.has_ssh = true
+        d.vagrant_machine = "boot2docker"
+        d.vagrant_vagrantfile = "./boot2docker/Vagrantfile"
       end
-
       bigtop.ssh.username = "root"
       bigtop.ssh.port = 22
-      bigtop.vm.hostname = $bigtop_hostname
+      bigtop.vm.hostname = "bigtop#{i}.docker"
       bigtop.vm.synced_folder $bigtop_puppet, "/bigtop-puppet"
-
-      # shell provisioner to setup basic vm environment
-      bigtop.vm.provision :shell do |shell|
-        shell.path = "provision.sh"
-        shell.args = $bigtop_master + " " + $bigtop_hostname
-      end
-
-      bigtop.vm.provision :hostmanager
-
-      # deploy Apache Hadoop and it's ecosystem
-      bigtop.vm.provision :puppet do |puppet|
-        puppet.module_path = $bigtop_puppet + "/modules"
-        puppet.manifests_path = $bigtop_puppet + "/manifests"
-        puppet.manifest_file  = "site.pp"
-        puppet.options = "--debug --confdir=/bigtop-puppet"
-      end
     end
   end
 

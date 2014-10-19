@@ -19,66 +19,96 @@
 
 ## Overview
 
-The Vagrantfile definition creates a bigtop virtual hadoop cluster on top of docker containers for you, by pulling from existing publishing bigtop repositories.
+The Vagrantfile definition and wrapper script that creates Bigtop virtual Hadoop cluster on top of Docker containers for you, by pulling from existing publishing bigtop repositories.
 This cluster can be used:
 
 - to test bigtop smoke tests
 - to test bigtop puppet recipes
 
-## Preparation
+## Prerequisites
 
-1) Prepare a Linux environment with [docker](https://docs.docker.com/installation/#installation) installed(currently this recipe supports Linux host only)
+### OS X and Windows
 
-2) Install [Vagrant](https://www.vagrantup.com/downloads.html)
+* Install [VirtualBox](https://www.virtualbox.org/wiki/Downloads)
 
-3) Install [vagrant-hostmanager plugin](https://github.com/smdahlen/vagrant-hostmanager) to better manage `/etc/hosts`
+* Install [Vagrant](http://www.vagrantup.com/downloads.html)
+
+### Linux
+
+* [Kernel Requirements](http://docker.readthedocs.org/en/v0.5.3/installation/kernel/)
+
+* Install [Docker](https://docs.docker.com/installation/)
+
+* Install [Vagrant](http://www.vagrantup.com/downloads.html)
+
+## Getting Started
+
+* Create a 3 node Bigtop Hadoop cluster from scratch
 
 ```
-sudo vagrant plugin install vagrant-hostmanager
-```
-
-4) Install [vagrant-cachier plugin](https://github.com/fgrehm/vagrant-cachier) to cache packages at local
-
-```
-sudo vagrant plugin install vagrant-cachier
+cd bigtop/bigtop-deploy/vm/docker-puppet
+./docker-hadoop.sh --build-image --create 3
 ```
 
 ## USAGE
 
-5) Get bigtop source code ready
+1) Build up the base Docker image that supports Vagrant.
 
 ```
-git clone https://github.com/apache/bigtop.git
-cd bigtop/bigtop-deploy/vm/docker-puppet
+./docker-hadoop.sh --build-image
 ```
 
-6) Build up a centos 6.4 image supports ssh, scp and sudo required by vagrant
+2) Create a Bigtop Hadoop cluster by given # of node. (will place a file called config.rb)
 
 ```
-sudo docker build -t bigtop/ssh:centos-6.4 .
+./docker-hadoop.sh --create 3
 ```
 
-7) To provision a 3 node Apache Hadoop cluster on top of docker containers
+3) Destroy the cluster.
 
 ```
-sudo vagrant up --no-provision && sudo vagrant provision
+./docker-hadoop.sh --destroy
 ```
 
-8) You can specify number of nodes you'd like to provision by modifying `num_instances` in Vagrantfile
+4) Update your cluster after doing configuration changes. (re-run puppet apply)
 
 ```
-num_instances = 5
+./docker-hadoop.sh --provision
 ```
 
-##Example:
+5) Chain your operations with-in one command.
 
-9) Run hbase-test.sh to evaluate the deployment.
+```
+./docker-hadoop.sh --build-image --create 5 --destroy
+```
+
+Commands will be executed by following order:
+
+```
+build-image => create 5 node cluster => destroy the cluster
+```
+
+6) Run hbase-test.sh to evaluate the deployment.
 
 ```
 ../vagrant-puppet/hbase-test.sh
 ```
 
+7) See helper message:
+
+```
+./docker-hadoop.sh -h
+usage: docker-hadoop.sh [options]
+       -b, --build-image                         Build base Docker image for Bigtop Hadoop
+                                                 (must be exectued at least once before creating cluster)
+       -c NUM_INSTANCES, --create NUM_INSTANCES  Create a docker based Bigtop Hadoop cluster
+       -p, --provision                           Deploy configuration changes
+       -d, --destroy                             Destroy the cluster
+       -h, --help
+```
+
 ##Configure Apache Hadoop ecosystem components
+
 * Choose the ecosystem you want to be deployed by modifying components in provision.sh.
 
 ```
@@ -88,8 +118,6 @@ num_instances = 5
 By default, Apache Hadoop, YARN, and Apache HBase will be installed.
 See `bigtop-deploy/puppet/config/site.csv.example` for more details.
 
-##Note:
-
-* For bigtop 0.7.0 code base, you must change the value of the [yarn-site.xml](https://github.com/apache/bigtop/blob/master/bigtop-deploy/puppet/modules/hadoop/templates/yarn-site.xml) yarn.nodemanager.aux.services from "mapreduce_shuffle" to "mapreduce.shuffle" before `vagrant up`
+##Notes
 
 * Users currently using vagrant 1.6+ is strongly recommanded to upgrade to 1.6.4+, otherwise you will encounter the [issue](https://github.com/mitchellh/vagrant/issues/3769) when installing plguins
