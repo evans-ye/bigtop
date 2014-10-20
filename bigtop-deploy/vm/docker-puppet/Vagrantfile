@@ -42,6 +42,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       d.vagrant_machine = "boot2docker"
       d.vagrant_vagrantfile = "./boot2docker/Vagrantfile"
     end
+    image.ssh.username = "root"
+    image.ssh.port = 22
   end
 
   # nodes definition

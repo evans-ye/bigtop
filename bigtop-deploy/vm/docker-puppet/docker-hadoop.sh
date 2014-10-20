@@ -13,12 +13,18 @@ usage() {
 
 build-image() {
     vagrant up image --provider docker
+    {
+        echo "echo -e '\nBUILD IMAGE SUCCESS.\n'" |vagrant ssh image
+    } || {
+        >&2 echo -e "\nBUILD IMAGE FAILED!\n"
+	exit 2
+    }
     vagrant destroy image -f
 }
 
 create() {
     echo "\$num_instances = $1" > config.rb
-    vagrant up
+    vagrant up --no-parallel
     nodes=(`vagrant status |grep running |awk '{print $1}'`)
     hadoop_head_node=(`echo "hostname -f" |vagrant ssh ${nodes[0]} |tail -n 1`)
     echo "/vagrant/provision.sh $hadoop_head_node" |vagrant ssh ${nodes[0]}
