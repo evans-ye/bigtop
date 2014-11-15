@@ -15,10 +15,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Install puppet agent
-yum -y install http://yum.puppetlabs.com/puppetlabs-release-el-6.noarch.rpm
-yum -y install puppet
-
 sysctl kernel.hostname=`hostname -f`
 
 # Unmount device /etc/hosts and replace it by a shared hosts file
@@ -36,14 +32,3 @@ bigtop_yumrepo_uri,http://bigtop01.cloudera.org:8080/view/Releases/job/Bigtop-0.
 jdk_package_name,java-1.7.0-openjdk-devel.x86_64
 components,hadoop,hbase,yarn,mapred-app
 EOF
-
-mkdir -p /data/{1,2}
-
-# Setup rng-tools to improve virtual machine entropy performance.
-# The poor entropy performance will cause kerberos provisioning failed.
-yum -y install rng-tools
-sed -i.bak 's/EXTRAOPTIONS=\"\"/EXTRAOPTIONS=\"-r \/dev\/urandom\"/' /etc/sysconfig/rngd
-service rngd start
-
-echo "Now installing gradle"
-cd /bigtop-home && puppet apply --modulepath=./ -e "include bigtop_toolchain::gradle" # alias gradle=/usr/local/gradle/bin/gradle
