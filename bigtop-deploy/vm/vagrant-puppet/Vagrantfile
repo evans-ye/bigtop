@@ -21,9 +21,6 @@ require "yaml"
 _config = YAML.load(File.open(File.join(File.dirname(__FILE__), "vagrantconfig.yaml"), File::RDONLY).read)
 CONF = _config
 
-# number of instances
-$num_instances = 3
-
 VAGRANTFILE_API_VERSION = "2"
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # Repository
@@ -74,7 +71,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       # shell provisioner to setup basic vm environment
       bigtop.vm.provision :shell do |shell|
 	shell.path = "provision.sh"
-        shell.args = [ bigtop_master , repo ]
+        shell.args = [ bigtop_master , repo, CONF["components"]]
       end
 
       bigtop.vm.provision :hostmanager

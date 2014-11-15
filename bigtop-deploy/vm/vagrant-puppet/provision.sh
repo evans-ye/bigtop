@@ -28,5 +28,5 @@ hadoop_head_node,$1
 hadoop_storage_dirs,/data/1,/data/2
 bigtop_yumrepo_uri,$2
 jdk_package_name,java-1.7.0-openjdk-devel.x86_64
-components,hadoop,hbase,yarn,mapred-app
+components,$3
 EOF

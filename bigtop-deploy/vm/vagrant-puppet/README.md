@@ -58,6 +58,10 @@ num_instances = 5
 
 5) Run hbase-test.sh to evaluate the deployment.
 
+```
+../utils/hbase-test.sh
+```
+
 ##Configure Apache Hadoop ecosystem components
 * Choose the ecosystem you want to be deployed by modifying components in provision.sh.
 
