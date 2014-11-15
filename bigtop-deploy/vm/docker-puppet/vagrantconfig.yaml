@@ -4,6 +4,7 @@ docker:
 
 boot2docker:
         memory_size: "4196"
+        number_cpus: "2"
 
 namenode_ui_port: "50070"
 yarn_ui_port: "8088"
