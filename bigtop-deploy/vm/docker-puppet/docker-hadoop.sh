@@ -49,7 +49,7 @@ provision() {
 
 smoke-tests() {
     nodes=(`vagrant status |grep running |awk '{print $1}'`)
-    echo "/bigtop-home/bigtop-deploy/vm/smoke-tests.sh" |vagrant ssh ${nodes[0]}
+    echo "/bigtop-home/bigtop-deploy/vm/utils/smoke-tests.sh" |vagrant ssh ${nodes[0]}
 }
 
 
