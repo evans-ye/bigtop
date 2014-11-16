@@ -1,5 +1,5 @@
 docker:
-        memory_size: "1024"
+        memory_size: "2048"
         image: "bigtop/ssh:centos-6.4"
 
 boot2docker:
