@@ -48,11 +48,21 @@ vagrant plugin install vagrant-cachier
 vagrant up
 ```
 
-4) You can specify number of nodes you'd like to provision by modifying `num_instances` in Vagrantfile
+4) You can specify number of nodes you'd like to provision by modifying `num_instances` in vagrantconfig.yaml
 
 ```
-num_instances = 5
+num_instances: 5
 ```
+
+##Configure Apache Hadoop ecosystem components
+* Choose the ecosystem you want to be deployed by modifying components in vagrantconfig.yaml
+
+```
+components: "hadoop,hbase,yarn,mapred-app,..."
+```
+
+By default, Apache Hadoop, YARN, and Apache HBase will be installed.
+See `bigtop-deploy/puppet/config/site.csv.example` for more details.
 
 ##Example:
 
@@ -61,17 +71,3 @@ num_instances = 5
 ```
 ../utils/hbase-test.sh
 ```
-
-##Configure Apache Hadoop ecosystem components
-* Choose the ecosystem you want to be deployed by modifying components in provision.sh.
-
-```
-     components,hadoop,hbase,yarn,mapred-app,...
-```
-
-By default, Apache Hadoop, YARN, and Apache HBase will be installed.
-See `bigtop-deploy/puppet/config/site.csv.example` for more details.
-
-##Note:
-
-For bigtop 0.7.0 code base, you must change the value of the [yarn-site.xml](https://github.com/apache/bigtop/blob/master/bigtop-deploy/puppet/modules/hadoop/templates/yarn-site.xml) yarn.nodemanager.aux.services from "mapreduce_shuffle" to "mapreduce.shuffle" before `vagrant up`
