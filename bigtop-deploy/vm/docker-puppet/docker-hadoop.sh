@@ -61,7 +61,10 @@ destroy() {
 }
 
 bigtop-puppet() {
-    echo "puppet apply -d --confdir=/vagrant --modulepath=/bigtop-home/bigtop-deploy/puppet/modules /bigtop-home/bigtop-deploy/puppet/manifests/site.pp" |vagrant ssh $1
+    bigtop-puppet() {
+        echo "puppet apply -d --confdir=/vagrant --modulepath=/bigtop-home/bigtop-deploy/puppet/modules:/etc/puppet/modules /bigtop-home/bigtop-deploy/puppet/manifests/site.pp" |vagrant ssh $1
+}
+
 }
 
 PROG=`basename $0`
