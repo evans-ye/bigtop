@@ -29,15 +29,21 @@ create() {
     hadoop_head_node=(`echo "hostname -f" |vagrant ssh ${nodes[0]} |tail -n 1`)
     repo=$(get-yaml-config repo)
     components=$(get-yaml-config components)
-    echo "/bigtop-home/bigtop-deploy/vm/utils/setup-env.sh" |vagrant ssh ${nodes[0]}
-    echo "/vagrant/provision.sh $hadoop_head_node $repo $components" |vagrant ssh ${nodes[0]}
+    enable_local_yum=$(get-yaml-config enable_local_yum)
+
+    # setup environment before running bigtop puppet deployment
+    for ((i=0 ; i<${#nodes[*]} ; i++)); do
+	(
+        echo "/bigtop-home/bigtop-deploy/vm/utils/setup-env.sh $enable_local_yum" |vagrant ssh ${nodes[$i]}
+        echo "/vagrant/provision.sh $hadoop_head_node $repo $components" |vagrant ssh ${nodes[$i]}
+	) &
+    done
+    wait
+
+    # run bigtop puppet (master node need to be provisioned before slave nodes)
     bigtop-puppet ${nodes[0]}
     for ((i=1 ; i<${#nodes[*]} ; i++)); do
-        (
-        echo "/bigtop-home/bigtop-deploy/vm/utils/setup-env.sh" |vagrant ssh ${nodes[$i]}
-        echo "/vagrant/provision.sh $hadoop_head_node $repo $components" |vagrant ssh ${nodes[$i]}
-        bigtop-puppet ${nodes[$i]}
-        ) &
+        bigtop-puppet ${nodes[$i]} &
     done
     wait
 }
@@ -54,7 +60,6 @@ smoke-tests() {
     nodes=(`vagrant status |grep running |grep -v image |awk '{print $1}'`)
     echo "/bigtop-home/bigtop-deploy/vm/utils/smoke-tests.sh" |vagrant ssh ${nodes[0]}
 }
-
 
 destroy() {
     rm -rf ./hosts ./config ./config.rb
