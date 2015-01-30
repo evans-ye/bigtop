@@ -63,7 +63,7 @@ def final USAGE = """\
     HOW TO INVOKE:
 
     1) Simple groovy based method:  Just manually construct a hadoop classpath:
-    
+
     groovy -classpath /usr/lib/hadoop/hadoop-common-2.0.6-alpha.jar
     :/usr/lib/hadoop/lib/guava-11.0.2.jar
     :/etc/hadoop/conf/:/usr/lib/hadoop/hadoop-common-2.0.6-alpha.jar
@@ -71,7 +71,7 @@ def final USAGE = """\
     :/usr/lib/hadoop/lib/commons-lang-2.5.jar:/usr/lib/hadoop/hadoop-auth.jar
     :/usr/lib/hadoop/lib/slf4j-api-1.6.1.jar
     :/usr/lib/hadoop-hdfs/hadoop-hdfs.jar
-    :/usr/lib/hadoop/lib/protobuf-java-2.4.0a.jar /vagrant/provision.groovy 
+    :/usr/lib/hadoop/lib/protobuf-java-2.4.0a.jar /vagrant/init-hcfs.groovy
     /vagrant/init-hcfs.json
 
     2) Another method: Follow the instructions on groovy.codehaus.org/Running
