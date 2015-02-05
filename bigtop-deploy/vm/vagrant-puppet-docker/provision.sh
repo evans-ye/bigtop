@@ -30,14 +30,11 @@ mkdir -p /etc/puppet/hieradata
 cp /bigtop-home/bigtop-deploy/puppet/hiera.yaml /etc/puppet
 cp -r /bigtop-home/bigtop-deploy/puppet/hieradata/bigtop/ /etc/puppet/hieradata/bigtop/
 cat > /etc/puppet/hieradata/site.yaml << EOF
-bigtop::hadoop_head_node: "bigtop1.docker"
+bigtop::hadoop_head_node: $1
 hadoop::hadoop_storage_dirs:
 - "/data/1"
 - "/data/2"
-hadoop_cluster_node::cluster_components:
-  - hadoop
-  - yarn
-  - hbase
-Bigtop::bigtop_yumrepo_uri: "http://bigtop01.cloudera.org:8080/view/Releases/job/Bigtop-0.8.0/label=centos6/6/artifact/output/"
+Bigtop::bigtop_yumrepo_uri: $2
 bigtop::jdk_package_name: "java-1.7.0-openjdk-devel.x86_64"
+hadoop_cluster_node::cluster_components: [$3]
 EOF
