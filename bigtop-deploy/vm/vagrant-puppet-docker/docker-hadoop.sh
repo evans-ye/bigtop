@@ -28,14 +28,14 @@ create() {
     nodes=(`vagrant status |grep running |grep -v image |awk '{print $1}'`)
     hadoop_head_node=(`echo "hostname -f" |vagrant ssh ${nodes[0]} |tail -n 1`)
     repo=$(get-yaml-config repo)
-    components=$(get-yaml-config components)
+    components=`echo $(get-yaml-config components) | sed 's/ /, /g'`
     echo "/bigtop-home/bigtop-deploy/vm/utils/setup-env.sh" |vagrant ssh ${nodes[0]}
     echo "/vagrant/provision.sh $hadoop_head_node $repo $components" |vagrant ssh ${nodes[0]}
     bigtop-puppet ${nodes[0]}
     for ((i=1 ; i<${#nodes[*]} ; i++)); do
         (
         echo "/bigtop-home/bigtop-deploy/vm/utils/setup-env.sh" |vagrant ssh ${nodes[$i]}
-        echo "/vagrant/provision.sh $hadoop_head_node $repo $components" |vagrant ssh ${nodes[$i]}
+        echo "/vagrant/provision.sh $hadoop_head_node $repo \"$components\"" |vagrant ssh ${nodes[$i]}
         bigtop-puppet ${nodes[$i]}
         ) &
     done
@@ -66,7 +66,7 @@ destroy() {
 }
 
 bigtop-puppet() {
-    echo "puppet apply -d --confdir=/vagrant --modulepath=/bigtop-home/bigtop-deploy/puppet/modules:/etc/puppet/modules /bigtop-home/bigtop-deploy/puppet/manifests/site.pp" |vagrant ssh $1
+    echo "puppet apply -d --modulepath=/bigtop-home/bigtop-deploy/puppet/modules:/etc/puppet/modules /bigtop-home/bigtop-deploy/puppet/manifests/site.pp" |vagrant ssh $1
 }
 
 get-yaml-config() {

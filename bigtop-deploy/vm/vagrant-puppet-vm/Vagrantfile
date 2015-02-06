@@ -44,13 +44,17 @@ chkconfig iptables off
 cat /dev/null > /etc/hosts
 echo "Bigtop yum repo = #{repo}"
 # Prepare puppet configuration file
-mkdir /vagrant/config
-cat > /vagrant/config/site.csv << EOF
-hadoop_head_node,#{bigtop_master}
-hadoop_storage_dirs,/data/1,/data/2
-bigtop_yumrepo_uri,#{repo}
-jdk_package_name,java-1.7.0-openjdk-devel.x86_64
-components,#{components}
+mkdir -p /vagrant/config/hieradata
+cp /bigtop-home/bigtop-deploy/puppet/hiera.yaml /vagrant/config/
+cp -r /bigtop-home/bigtop-deploy/puppet/hieradata/bigtop/ /vagrant/config/hieradata/bigtop/
+cat > /etc/puppet/hieradata/site.yaml << EOF
+bigtop::hadoop_head_node: #{bigtop_master}
+hadoop::hadoop_storage_dirs:
+- "/data/1"
+- "/data/2"
+hadoop_cluster_node::cluster_components: #{components}
+bigtop::bigtop_yumrepo_uri: #{repo}
+bigtop::jdk_package_name: "java-1.7.0-openjdk-devel.x86_64"
 EOF
 SCRIPT
 
