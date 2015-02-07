@@ -39,7 +39,7 @@ create() {
     for node in ${nodes[*]}; do
         (
         echo "/bigtop-home/bigtop-deploy/vm/utils/setup-env-$distro.sh" |vagrant ssh $node
-        echo "/vagrant/provision.sh $hadoop_head_node $repo $components" |vagrant ssh $node
+        echo "/vagrant/provision.sh $hadoop_head_node $repo \"$components\"" |vagrant ssh $node
         ) &
     done
     wait
