@@ -54,7 +54,7 @@ create() {
 
 provision() {
     nodes=(`vagrant status |grep running |grep -v image |awk '{print $1}'`)
-    for node in $nodes; do
+    for node in ${nodes[*]}; do
         bigtop-puppet $node &
     done
     wait
@@ -69,7 +69,7 @@ smoke-tests() {
 destroy() {
     rm -rf ./hosts ./config ./config.rb
     nodes=(`vagrant status |grep running |grep -v image |awk '{print $1}'`)
-    for node in $nodes; do
+    for node in ${nodes[*]}; do
         vagrant destroy -f $node
     done
     wait
