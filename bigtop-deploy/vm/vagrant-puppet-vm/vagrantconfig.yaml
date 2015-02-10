@@ -7,3 +7,4 @@ components: [hadoop, yarn]
 enable_local_yum: false
 run_smoke_tests: false
 distro: centos
+enable_local_yum: false
