@@ -16,7 +16,7 @@
 FROM bigtop/seed:centos-6.4
 
 # enable ssh
-RUN yum -y install openssh-server openssh-clients sudo
+RUN yum -y install openssh-server openssh-clients sudo unzip
 RUN sed -i.bak s/UsePAM\ yes/UsePAM\ no/ /etc/ssh/sshd_config
 RUN ssh-keygen -q -N "" -t dsa -f /etc/ssh/ssh_host_dsa_key
 RUN ssh-keygen -q -N "" -t rsa -f /etc/ssh/ssh_host_rsa_key

@@ -38,6 +38,10 @@ components = CONF['components']
 # Whether to run smoke tests
 run_smoke_tests = CONF['run_smoke_tests']
 
+# This is a update to allow dev packages
+# Force success - not worried if this step fails, since we generally only use it for development.
+enable_local_yum = CONF['enable_local_yum']
+
 # master node hostname
 bigtop_master = "bigtop1.vagrant"
 
@@ -101,7 +105,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       end
 
       # carry on w/ installation
-      bigtop.vm.provision "shell", path: "../utils/setup-env-" + distro + ".sh"
+      bigtop.vm.provision :shell do |shell|
+        shell.path: "../utils/setup-env-" + distro + ".sh"
+        shell.args = ["$enable_local_yum"]
+      end
       bigtop.vm.provision "shell", inline: $script
       bigtop.vm.provision :hostmanager
 
