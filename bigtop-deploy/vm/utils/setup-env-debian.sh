@@ -17,9 +17,11 @@
 
 enable_local_yum=${1:-false}
 
-apt-get update
 # Install puppet agent
-apt-get -y install puppet puppet-module-puppetlabs-stdlib curl
+wget https://apt.puppetlabs.com/puppetlabs-release-trusty.deb
+dpkg -i puppetlabs-release-trusty.deb
+apt-get update
+apt-get -y install puppet curl
 
 mkdir -p /data/{1,2}
 

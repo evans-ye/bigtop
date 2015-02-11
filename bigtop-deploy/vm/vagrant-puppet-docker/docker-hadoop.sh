@@ -39,6 +39,9 @@ create() {
     # setup environment before running bigtop puppet deployment
     for node in ${nodes[*]}; do
         (
+        if [ $distro == "debian" ]; then
+	   echo "echo 'deb http://bigtop01.cloudera.org:8080/view/Releases/job/Bigtop-0.8.0/label=trusty/5/artifact/output/apt/ bigtop contrib' > /etc/apt/sources.list.d/Bigtop.list" | vagrant ssh $node
+	fi
         echo "/bigtop-home/bigtop-deploy/vm/utils/setup-env-$distro.sh $enable_local_yum" |vagrant ssh $node
         echo "/vagrant/provision.sh $hadoop_head_node $repo \"$components\"" |vagrant ssh $node
         ) &

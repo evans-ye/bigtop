@@ -1,14 +1,15 @@
 docker:
         memory_size: "2048"
-        image:  "debian:jessie"
+        image:  "bigtop/ssh:ubuntu-14.04"
 
 boot2docker:
         memory_size: "4196"
         number_cpus: "2"
 
-repo: "http://to.do/notyet"
+repo: "http://bigtop01.cloudera.org:8080/view/Releases/job/Bigtop-0.8.0/label=trusty/5/artifact/output/apt/"
 distro: debian
 components: [hadoop, yarn]
 namenode_ui_port: "50070"
 yarn_ui_port: "8088"
 hbase_ui_port: "60010"
+enable_local_yum: true

@@ -13,12 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM debian:jessie
+FROM bigtop/seed:ubuntu-14.04
 
 # enable ssh
-
 RUN apt-get update
 RUN apt-get install -y openssh-server sudo wget
+RUN sed -i.bak s/UsePAM\ yes/UsePAM\ no/ /etc/ssh/sshd_config
 
 # requiretty off
 RUN sed -i.bak 's/requiretty/!requiretty/' /etc/sudoers

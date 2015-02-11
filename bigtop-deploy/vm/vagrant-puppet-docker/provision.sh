@@ -25,12 +25,12 @@ ln -s /vagrant/hosts /etc/hosts
 
 # Prepare puppet configuration file
 if [ -f /etc/debian_version ] ; then
-    apt-get -y install puppet-module-puppetlabs-stdlib
     jdk="openjdk-7-jdk"
 else
-    cd /etc/puppet/modules && puppet module install puppetlabs/stdlib
     jdk="java-1.7.0-openjdk-devel.x86_64"
 fi
+
+puppet module install puppetlabs/stdlib
 
 mkdir -p /etc/puppet/hieradata
 cp /bigtop-home/bigtop-deploy/puppet/hiera.yaml /etc/puppet
