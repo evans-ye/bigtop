@@ -31,7 +31,7 @@
 #  - /data/3
 #  - /data/4
 
-#bigtop::bigtop_yumrepo_uri: "http://mirror.example.com/path/to/mirror/"
+#bigtop::bigtop_repo_uri: "http://mirror.example.com/path/to/mirror/"
 
 # Test-only variable controls if user hdfs' sshkeys should be installed to allow
 # for passwordless login across the cluster. Required by some integration tests
@@ -94,7 +94,7 @@ tachyon::common::master_host: "%{hiera('bigtop::hadoop_head_node')}"
 
 hadoop-zookeeper::server::myid: "0"
 hadoop-zookeeper::server::ensemble:
-  - ["%{hiera('bigtop::hadoop_head_node')}:2888:3888"]
+  - "%{hiera('bigtop::hadoop_head_node')}:2888:3888"
 hadoop-zookeeper::server::kerberos_realm: "%{hiera('kerberos::site::realm')}"
 
 # those are only here because they were present as extlookup keys previously
