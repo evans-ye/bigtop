@@ -128,3 +128,44 @@ And run the following on those nodes:
 When gridgain-hadoop accelerator is deployed the client configs are placed under
 /etc/hadoop/gridgain.client.conf. All one needs to do to run Mapreduce jobs on gridgain-hadoop grid
 is to set HADOOP_CONF_DIR=/etc/hadoop/gridgain.client.conf in the client session.
+
+# Security
+
+These classes are mainly intended for regression testing. For ease of use they
+contain insecure default passwords in a number of places. If you intend to use
+them in production environments, make sure to track down all those places and
+set proper passwords. This can be done using the corresponding hiera settings.
+
+## Automatic password generation
+
+We are making an effort to remove those default passwords. To still be able to
+use the manifests out of the box, a program called trocla can be employed to
+automatically generate passwords. If a Puppet master/agent setup is in use,
+they're stored on the master and delivered to the clients over SSL encrypted
+Puppet connections. As an added benefit, things like cookie secrets that need to
+be the same across hosts, just are.
+
+Before use, trocla needs to be installed on the master. To do so, run the following:
+
+<pre>
+# gem install trocla
+# puppet module install duritong/trocla
+# puppet apply -e "class { 'trocla::config': manage_dependencies => false }"
+</pre>
+
+The trocla ruby gem pulls in highline, moneta and bcrypt. The bcrypt gem might
+need ruby development packages (ruby.h) and a compiler. Alternatively you can
+use your distributions' packages. The following test should work after that:
+
+<pre>
+# puppet apply -e "file { '/tmp/test': content => trocla("test", "plain") }"
+# cat /tmp/test
+puGNOX-G%zYDKHet
+</pre>
+
+Now, automatic password generating can be activated in site.yaml using
+hadoop::common_hdfs::generate_secrets: true.
+
+Note that this (for the moment) only affects the WebGUI authentication cookie
+secret. More like the httpfs secret are to follow over time. The hiera setting
+name might change for that.

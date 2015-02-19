@@ -148,6 +148,11 @@ class hadoop ($hadoop_security_authentication = "simple",
       $hadoop_snappy_codec = undef,
       $hadoop_security_authentication = $hadoop::hadoop_security_authentication,
       $kerberos_realm = $hadoop::kerberos_realm,
+      $hadoop_http_authentication_type = undef,
+      $hadoop_http_authentication_signature_secret = undef,
+      $hadoop_http_authentication_signature_secret_file = "/etc/hadoop/conf/hadoop-http-authentication-signature-secret",
+      $hadoop_http_authentication_cookie_domain = regsubst($fqdn, "^[^\\.]+\\.", ""),
+      $generate_secrets = false,
   ) inherits hadoop {
 
     $sshfence_keydir  = "$hadoop_ha_sshfence_user_home/.ssh"
@@ -223,6 +228,54 @@ class hadoop ($hadoop_security_authentication = "simple",
       "/etc/hadoop/conf/hdfs-site.xml":
         content => template('hadoop/hdfs-site.xml'),
         require => [Package["hadoop"]],
+    }
+
+    if $hadoop_http_authentication_type == "kerberos" {
+      if $generate_secrets {
+        $http_auth_sig_secret = trocla("hadoop_http_authentication_signature_secret", "plain")
+      } else {
+        $http_auth_sig_secret = $hadoop_http_authentication_signature_secret
+      }
+
+      file { 'hadoop-http-auth-sig-secret':
+        path => "${hadoop_http_authentication_signature_secret_file}",
+        # it's a password file - do not filebucket
+        backup => false,
+        mode => "0440",
+        owner => "root",
+        # allows access by hdfs and yarn (and mapred - mhmm...)
+        group => "hadoop",
+        content => inline_template("<%= @http_auth_sig_secret %>"),
+        require => [Package["hadoop"]],
+      }
+
+      # all the services will need this
+      File['hadoop-http-auth-sig-secret'] ~> Service<| title == "hadoop-hdfs-journalnode" |>
+      File['hadoop-http-auth-sig-secret'] ~> Service<| title == "hadoop-hdfs-namenode" |>
+      File['hadoop-http-auth-sig-secret'] ~> Service<| title == "hadoop-hdfs-datanode" |>
+      File['hadoop-http-auth-sig-secret'] ~> Service<| title == "hadoop-yarn-resourcemanager" |>
+      File['hadoop-http-auth-sig-secret'] ~> Service<| title == "hadoop-yarn-nodemanager" |>
+
+      require kerberos::client
+      kerberos::host_keytab { "HTTP":
+        # we need only the HTTP SPNEGO keys
+        princs => [],
+        spnego => true,
+        owner => "root",
+        group => "hadoop",
+        mode => "0440",
+        # we don't actually need this package as long as we don't put the
+        # keytab in a directory managed by it. But it creates group hadoop which
+        # we wan't to give the keytab to.
+        require => Package["hadoop"],
+      }
+
+      # all the services will need this as well
+      Kerberos::Host_keytab["HTTP"] -> Service<| title == "hadoop-hdfs-journalnode" |>
+      Kerberos::Host_keytab["HTTP"] -> Service<| title == "hadoop-hdfs-namenode" |>
+      Kerberos::Host_keytab["HTTP"] -> Service<| title == "hadoop-hdfs-datanode" |>
+      Kerberos::Host_keytab["HTTP"] -> Service<| title == "hadoop-yarn-resourcemanager" |>
+      Kerberos::Host_keytab["HTTP"] -> Service<| title == "hadoop-yarn-nodemanager" |>
     }
   }
 
