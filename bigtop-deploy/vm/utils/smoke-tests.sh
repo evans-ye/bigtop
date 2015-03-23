@@ -1,5 +1,6 @@
 #!/bin/bash
 HCFS_USER="hdfs"
+SMOKE_TESTS=${1:-mapreduce,pig}
 
 export HADOOP_CONF_DIR=/etc/hadoop/conf/
 export BIGTOP_HOME=/bigtop-home/
@@ -21,4 +22,4 @@ if [ -f /etc/debian_version ] ; then
 else
     yum install -y pig hive flume mahout
 fi
-cd /bigtop-home/bigtop-tests/smoke-tests && ./gradlew clean compileGroovy test -Dsmoke.tests=mapreduce,pig --info
+cd /bigtop-home/bigtop-tests/smoke-tests && ./gradlew clean compileGroovy test -Dsmoke.tests=$1 --info
