@@ -64,7 +64,7 @@ provision() {
 
 smoke-tests() {
     nodes=(`vagrant status |grep running |grep -v image |awk '{print $1}'`)
-    smoke_test_components="[`echo $(get-yaml-config smoke_test_components) | sed 's/ /, /g'`]"
+    smoke_test_components="`echo $(get-yaml-config smoke_test_components) | sed 's/ /,/g'`"
     echo "/bigtop-home/bigtop-deploy/vm/utils/smoke-tests.sh \"$smoke_test_components\"" |vagrant ssh ${nodes[0]}
 }
 

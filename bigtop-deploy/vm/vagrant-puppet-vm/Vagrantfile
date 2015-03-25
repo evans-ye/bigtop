@@ -39,7 +39,7 @@ components = CONF['components']
 run_smoke_tests = CONF['run_smoke_tests']
 
 # Smoke test Components to run
-smoke_test_components = CONF['smoke_test_components']
+smoke_test_components = CONF['smoke_test_components'].join(',')
 
 # This is a update to allow dev packages
 # Force success - not worried if this step fails, since we generally only use it for development.
