@@ -9,6 +9,7 @@ usage() {
     echo "       -c NUM_INSTANCES, --create=NUM_INSTANCES  Create a Docker based Bigtop Hadoop cluster"
     echo "       -p, --provision                           Deploy configuration changes"
     echo "       -s, --smoke-tests                         Run Bigtop smoke tests"
+    echo "       -i, --integration-tests                   Run Bigtop integration tests"
     echo "       -d, --destroy                             Destroy the cluster"
     echo "       -h, --help"
     exit 1
@@ -68,6 +69,11 @@ smoke-tests() {
     echo "/bigtop-home/bigtop-deploy/vm/utils/smoke-tests.sh \"$smoke_test_components\"" |vagrant ssh ${nodes[0]}
 }
 
+integration-tests() {
+    nodes=(`vagrant status |grep running |grep -v image |awk '{print $1}'`)
+    integration_test_components="`echo $(get-yaml-config integration_test_components)`"
+    echo "/bigtop-home/bigtop-deploy/vm/utils/integration-tests.sh integration_test_components" |vagrant ssh ${nodes[0]}
+}
 
 destroy() {
     nodes=(`vagrant status |grep running |grep -v image |awk '{print $1}'`)
@@ -124,6 +130,9 @@ while [ $# -gt 0 ]; do
         shift;;
     -s|--smoke-tests)
         smoke-tests
+        shift;;
+    -i|--integration-tests)
+        integration-tests
         shift;;
     -d|--destroy)
         destroy

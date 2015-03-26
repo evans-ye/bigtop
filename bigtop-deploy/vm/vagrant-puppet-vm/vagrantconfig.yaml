@@ -8,4 +8,6 @@ components: [hadoop, yarn]
 enable_local_repo: false
 run_smoke_tests: false
 smoke_test_components: [mapredcue, pig]
+run_integration_tests: true
+integration_test_components: [hadoop, hbase]
 jdk: "java-1.7.0-openjdk-devel.x86_64"

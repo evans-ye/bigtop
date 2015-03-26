@@ -41,6 +41,12 @@ run_smoke_tests = CONF['run_smoke_tests']
 # Smoke test Components to run
 smoke_test_components = CONF['smoke_test_components'].join(',')
 
+# Whether to run integration tests
+run_integration_tests = CONF['run_integration_tests']
+
+# Smoke test Components to run
+integration_test_components = CONF['integration_test_components'].join(' ')
+
 # This is a update to allow dev packages
 # Force success - not worried if this step fails, since we generally only use it for development.
 enable_local_repo = CONF['enable_local_repo']
@@ -126,6 +132,18 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
           bigtop.vm.provision :shell do |shell|
             shell.path = "../utils/smoke-tests.sh"
             shell.args = ["#{smoke_test_components}"]
+          end
+        else
+          puts "Not creating provisioner directive for tests yet... only on vm #{i} of #{num_instances}"
+        end
+      end
+
+      if run_integration_tests then
+        if i==num_instances then
+          puts "creating provisioner directive for running tests"
+          bigtop.vm.provision :shell do |shell|
+            shell.path = "../utils/integration-tests.sh"
+            shell.args = ["#{integration_test_components}"]
           end
         else
           puts "Not creating provisioner directive for tests yet... only on vm #{i} of #{num_instances}"
