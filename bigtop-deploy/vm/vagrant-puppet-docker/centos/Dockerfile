@@ -24,6 +24,10 @@ RUN ssh-keygen -q -N "" -t rsa -f /etc/ssh/ssh_host_rsa_key
 # requiretty off
 RUN sed -i.bak 's/requiretty/!requiretty/' /etc/sudoers
 
+# fix vagrant ssh long delay issue
+RUN sed -i.bak 's/GSSAPIAuthentication yes/#GSSAPIAuthentication yes/' /etc/ssh/sshd_config
+RUN echo 'UseDNS no' >> /etc/ssh/sshd_config
+
 # setup vagrant account
 RUN mkdir /root/.ssh/
 RUN chmod 0750 /root/.ssh
