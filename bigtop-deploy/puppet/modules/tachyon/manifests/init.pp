@@ -41,7 +41,7 @@ class tachyon {
     if ( $fqdn == $tachyon::common::master_host ) {
       service { "tachyon-master":
         ensure => running,
-        require => [ Package["tachyon"] ],
+        require => [ Package["tachyon"], Exec["tachyon formatting"], File["/etc/tachyon/conf/log4j.properties"], File["/etc/tachyon/conf/tachyon-env.sh"] ],
         hasrestart => true,
         hasstatus => true,
       }
@@ -60,7 +60,7 @@ class tachyon {
 
     service { "tachyon-worker":
       ensure => running,
-      require => [Package["tachyon"]],
+      require => [ Package["tachyon"], File["/etc/tachyon/conf/log4j.properties"], File["/etc/tachyon/conf/tachyon-env.sh"] ],
       hasrestart => true,
       hasstatus => true,
     }
