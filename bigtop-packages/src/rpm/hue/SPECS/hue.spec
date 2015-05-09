@@ -188,7 +188,6 @@ Summary: A browser-based desktop interface for Hadoop
 BuildRequires: python-devel, python-setuptools, gcc, gcc-c++
 BuildRequires: libxml2-devel, libxslt-devel, zlib-devel
 BuildRequires: cyrus-sasl-devel
-BuildRequires: openssl
 BuildRequires: krb5-devel
 BuildRequires: asciidoc
 Group: Applications/Engineering
