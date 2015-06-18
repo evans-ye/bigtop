@@ -26,5 +26,10 @@ class bigtop_toolchain::jdk {
         ensure => present
       }
     }
+    /(OpenSuSE)/: {
+      package { 'java-1_7_0-openjdk-devel' :
+        ensure => present
+      }
+    }
   }
 }
