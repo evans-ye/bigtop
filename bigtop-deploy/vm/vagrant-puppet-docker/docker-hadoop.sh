@@ -1,42 +1,15 @@
 #!/bin/bash
-# Licensed to the Apache Software Foundation (ASF) under one or more
-# contributor license agreements.  See the NOTICE file distributed with
-# this work for additional information regarding copyright ownership.
-# The ASF licenses this file to You under the Apache License, Version 2.0
-# (the "License"); you may not use this file except in compliance with
-# the License.  You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 
 usage() {
     echo "usage: $PROG [-C file ] args"
     echo "       -C file                                   Use alternate file for vagrantconfig.yaml"
     echo "  commands:"
-    echo "       -b, --build-image                         Build base Docker image for Bigtop Hadoop"
-    echo "                                                 (must be exectued at least once before creating cluster)"
     echo "       -c NUM_INSTANCES, --create=NUM_INSTANCES  Create a Docker based Bigtop Hadoop cluster"
     echo "       -p, --provision                           Deploy configuration changes"
     echo "       -s, --smoke-tests                         Run Bigtop smoke tests"
     echo "       -d, --destroy                             Destroy the cluster"
     echo "       -h, --help"
     exit 1
-}
-
-build-image() {
-    echo "\$vagrantyamlconf = \"$vagrantyamlconf\"" > config.rb
-    vagrant up image --provider docker
-    {
-        echo "echo -e '\nBUILD IMAGE SUCCESS.\n'" |vagrant ssh image
-    } || {
-        >&2 echo -e "\nBUILD IMAGE FAILED!\n"
-	exit 2
-    }
 }
 
 create() {
@@ -120,9 +93,6 @@ fi
 vagrantyamlconf="vagrantconfig.yaml"
 while [ $# -gt 0 ]; do
     case "$1" in
-    -b|--build-image)
-        build-image
-        shift;;
     -c|--create)
         if [ $# -lt 2 ]; then
           echo "Create requires a number" 1>&2
