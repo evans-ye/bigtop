@@ -16,10 +16,20 @@
 # limitations under the License.
 
 enable_local_repo=${1:-false}
-echo "$enable_local_repo"
 
 # Install puppet agent
-yum -y install http://yum.puppetlabs.com/puppetlabs-release-el-6.noarch.rpm
+# Fedora has pupept available in native repos, hence we don't need to handle that
+if [ -f /etc/centos-release ]; then
+    grep "CentOS Linux release 7" /etc/centos-release > /dev/null
+    if [ $? == 0 ]; then
+	yum -y install http://yum.puppetlabs.com/puppetlabs-release-el-7.noarch.rpm
+    fi
+    grep "CentOS release 6" /etc/centos-release > /dev/null
+    if [ $? == 0 ]; then
+	yum -y install http://yum.puppetlabs.com/puppetlabs-release-el-6.noarch.rpm
+    fi
+fi
+
 yum -y install puppet curl sudo unzip
 
 # Setup rng-tools to improve virtual machine entropy performance.
