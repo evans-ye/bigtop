@@ -13,21 +13,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM debian:jessie
+FROM ubuntu:14.04
 
 # enable ssh
 
-RUN apt-get update
-RUN apt-get install -y openssh-server sudo wget
-
-# requiretty off
-RUN sed -i.bak 's/requiretty/!requiretty/' /etc/sudoers
-
-# setup vagrant account
-RUN mkdir -p /root/.ssh
-RUN chmod 0750 /root/.ssh
-RUN wget http://github.com/mitchellh/vagrant/raw/master/keys/vagrant.pub --no-check-certificate -O /root/.ssh/authorized_keys
-RUN chmod 0640 /root/.ssh/authorized_keys
-
-RUN mkdir -p /var/run/sshd
+RUN apt-get update && \
+    apt-get install -y openssh-server sudo wget && \
+    # requiretty off 
+    sed -i.bak 's/requiretty/!requiretty/' /etc/sudoers && \
+    # set UsePAM to no
+    sed -i.bak 's/UsePAM yes/UsePAM no/' /etc/ssh/sshd_config && \
+    # setup vagrant account
+    mkdir -p /root/.ssh && \
+    chmod 0750 /root/.ssh && \
+    wget http://github.com/mitchellh/vagrant/raw/master/keys/vagrant.pub --no-check-certificate -O /root/.ssh/authorized_keys && \
+    chmod 0640 /root/.ssh/authorized_keys && \
+    mkdir -p /var/run/sshd
 CMD /usr/sbin/sshd -D

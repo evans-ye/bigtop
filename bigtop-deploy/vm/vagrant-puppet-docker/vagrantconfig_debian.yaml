@@ -15,7 +15,7 @@
 
 docker:
         memory_size: "4096"
-        image:  "bigtop/deploy:debian-8"
+        image:  "evansye/deploy:ubuntu-14.04"
 
 boot2docker:
         memory_size: "4096"
