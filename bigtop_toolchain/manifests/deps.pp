@@ -35,4 +35,10 @@ class bigtop_toolchain::deps {
     require => Package[$packages::pkgs],
     unless  => "/usr/bin/test -f /usr/src/gradle-2.4-bin.zip",
   }
+
+  exec {"/usr/bin/wget http://downloads.typesafe.com/zinc/0.3.7/zinc-0.3.7.tgz":
+    cwd     => "/usr/src",
+    require => Package[$packages::pkgs],
+    unless  => "/usr/bin/test -f /usr/src/zinc-0.3.7.tgz",
+  }
 }
