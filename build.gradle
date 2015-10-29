@@ -316,7 +316,7 @@ task "bigtop-slaves"(type:Exec,
       'Example:\n  $ ./gradlew -POS=debian-8 -Pprefix=1.0.0 bigtop-slaves\n' +
       'The built image name: bigtop/slaves:1.0.0-debian-8',
     group: DOCKERBUILD_GROUP) {
-  def _prefix = project.hasProperty("prefix") ? config : "trunk-"
+  def _prefix = project.hasProperty("prefix") ? config : "trunk"
   def _OS = project.hasProperty("OS") ? OS : "centos-7"
   def command = [
       'docker', 'build',
