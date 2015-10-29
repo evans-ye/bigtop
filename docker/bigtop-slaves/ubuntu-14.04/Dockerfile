@@ -15,6 +15,8 @@
 FROM bigtop/puppet:ubuntu-14.04
 MAINTAINER oflebbe@apache.org
 
-COPY bigtop_toolchain /etc/puppet/modules/bigtop_toolchain
-
-RUN puppet apply -e "include bigtop_toolchain::installer"
+# Set the bigtop repository as docker build context
+COPY . /bigtop 
+RUN ln -s /bigtop/bigtop_toolchain /etc/puppet/modules/ && \
+    puppet apply -e "include bigtop_toolchain::installer" && \
+    (cd /bigtop; ./gradlew)

@@ -15,6 +15,8 @@
 FROM bigtop/puppet:fedora-20
 MAINTAINER oflebbe@apache.org
 
-COPY . /bigtop
-RUN puppet apply --modulepath=/bigtop -e "include bigtop_toolchain::installer" && \
+# Set the bigtop repository as docker build context
+COPY . /bigtop 
+RUN ln -s /bigtop/bigtop_toolchain /etc/puppet/modules/ && \
+    puppet apply -e "include bigtop_toolchain::installer" && \
     (cd /bigtop; ./gradlew)
