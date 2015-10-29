@@ -311,46 +311,22 @@ def artifactToInstall = {
 }
 
 task "bigtop-slaves"(type:Exec,
-    description: 'Build bigtop/slaves images.\nCreate a 3 node cluster:\n  $ ./gradlew -POS=centos-6 bigtop-slaves\n',
+    description: 'Build bigtop/slaves images.\n' +
+      'Usage:\n  $ ./gradlew -POS=[centos-6|centos-7|fedora-20|debian-8|ubuntu-14.04|opensuse-13.2] -Pprefix=STRING_TO_PREFIX bigtop-slaves\n' +
+      'Example:\n  $ ./gradlew -POS=debian-8 -Pprefix=1.0.0 bigtop-slaves\n' +
+      'The built image name: bigtop/slaves:1.0.0-debian-8',
     group: DOCKERBUILD_GROUP) {
   def _prefix = project.hasProperty("prefix") ? config : "trunk-"
   def _OS = project.hasProperty("OS") ? OS : "centos-7"
-  def _dockerfile = project.hasProperty("dockerfile") ? dockerfile : "docker/bigtop-slaves/" + _OS + "/Dockerfile"
   def command = [
       'docker', 'build',
-      '-t', 'bigtop/slaves:' + _prefix + _OS,
-      '-f', _dockerfile,
+      '-t', 'bigtop/slaves:' + _prefix + '-' + _OS,
+      '-f', "docker/bigtop-slaves/" + _OS + "/Dockerfile",
       '.'
   ]
   workingDir '.'
   commandLine command
 }
-
-//task "bigtop-slaves-os"(type:Exec,
-//    description: 'Build bigtop/slaves images.\nCreate a 3 node cluster:\n  $ ./gradlew -POS=centos-6 bigtop-slaves\n',
-//    group: DOCKERBUILD_GROUP) {
-//  def stdout = new ByteArrayOutputStream()
-//  def result = exec {
-//    executable = "ls"
-//    args ['docker/bigtop-slaves/']
-//    standardOutput = stdout
-//  }
-//  println "Supported OSs: ${stdout.toString()}"
-//}
-
-//task "bigtop-slaves-OSs"(type:Exec,
-//    description: 'Build bigtop/slaves images.\nCreate a 3 node cluster:\n  $ ./gradlew -POS=centos-6 bigtop-slaves\n',
-//    group: DOCKERBUILD_GROUP) {
-//  def result = exec {
-//    commandLine "/bin/bash", "-c",
-//    """
-//    find docker/bigtop-slaves/ -name Dockerfile
-//    """
-//  }
-//  def command = ['echo', result]
-//  workingDir '.'
-//  commandLine command
-//}
 
 project.afterEvaluate{
   artifactToInstall(dependsOn: [installTopLevel, installCommon, installConf, installiTest])
