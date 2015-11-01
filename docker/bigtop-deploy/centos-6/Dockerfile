@@ -15,20 +15,11 @@
 
 FROM bigtop/puppet:centos-6
 
-COPY bigtop_toolchain /etc/puppet/modules/bigtop_toolchain
+COPY bigtop-deploy/puppet/hieradata /etc/puppet/hieradata
+COPY bigtop-deploy/puppet/hiera.yaml /etc/puppet/hiera.yaml
+#COPY bigtop-deploy/puppet /bigtop-home/bigtop-deploy/puppet
+COPY docker/bigtop-deploy/centos-6/bootstrap.sh /bootstrap.sh
 
-# enable ssh
-RUN yum -y install openssh-server openssh-clients vim && \
-    ssh-keygen -q -N "" -t dsa -f /etc/ssh/ssh_host_dsa_key && \
-    ssh-keygen -q -N "" -t rsa -f /etc/ssh/ssh_host_rsa_key && \
-    # requiretty off
-    sed -i.bak 's/requiretty/!requiretty/' /etc/sudoers && \
-    # setup vagrant account
-    mkdir /root/.ssh && \
-    chmod 0700 /root/.ssh && \
-    wget http://github.com/mitchellh/vagrant/raw/master/keys/vagrant.pub --no-check-certificate -O /root/.ssh/authorized_keys && \
-    chmod 0600 /root/.ssh/authorized_keys && \
-    # Install required Puppet modules
-    puppet apply -e "include bigtop_toolchain::puppet-modules"
+RUN mkdir -p /data/{1,2}
 
-CMD /usr/sbin/sshd -D
+CMD /bootstrap.sh

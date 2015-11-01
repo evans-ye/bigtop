@@ -13,4 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-docker build --no-cache --pull -t bigtop/deploy:hadoop_hbase -f Dockerfile ../../../../bigtop
+sed -i "s@<HADOOP_HEAD_NODE>@`hostname -f`@g" /etc/puppet/hieradata/site.yaml
+# TODO: insert bigtop local repo
+puppet apply -d --modulepath=/bigtop-home/bigtop-deploy/puppet/modules:/etc/puppet/modules /bigtop-home/bigtop-deploy/puppet/manifests/site.pp
+# TODO: execute smoke tests
+# TODO: execute integration tests
+sleep infinity

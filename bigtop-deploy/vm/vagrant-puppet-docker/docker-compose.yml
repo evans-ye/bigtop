@@ -1,0 +1,8 @@
+test:
+    image: bigtop/deploy:hadoop_hbase
+#    command: puppet apply -d --modulepath=/bigtop-home/bigtop-deploy/puppet/modules:/etc/puppet/modules /bigtop-home/bigtop-deploy/puppet/manifests/site.pp
+    command: sleep infinity
+    volumes:
+    - ~/bigtop-development/bigtop:/bigtop-home
+    - ./config/hieradata:/etc/puppet/hieradata
+    - ./config/hiera.yaml:/etc/puppet/hiera.yaml

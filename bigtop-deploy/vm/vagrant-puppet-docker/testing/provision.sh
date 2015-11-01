@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.
@@ -13,4 +15,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-docker build --no-cache --pull -t bigtop/deploy:hadoop_hbase -f Dockerfile ../../../../bigtop
+#sysctl kernel.hostname=`hostname -f`
+#
+## Unmount device /etc/hosts and replace it by a shared hosts file
+#echo -e "`hostname -i`\t`hostname -f`" >> /vagrant/hosts
+#umount /etc/hosts
+#mv /etc/hosts /etc/hosts.bak
+#ln -s /vagrant/hosts /etc/hosts
+
+# Prepare puppet configuration file
+mkdir -p /etc/puppet/hieradata
+cp /bigtop-home/bigtop-deploy/puppet/hiera.yaml /etc/puppet
+cp -r /bigtop-home/bigtop-deploy/puppet/hieradata/bigtop/ /etc/puppet/hieradata/
+cat > /etc/puppet/hieradata/site.yaml << EOF
+bigtop::hadoop_head_node: $1
+hadoop::hadoop_storage_dirs: [/data/1, /data/2]
+bigtop::bigtop_repo_uri: $2
+hadoop_cluster_node::cluster_components: $3
+bigtop::jdk_package_name: $4
+EOF
