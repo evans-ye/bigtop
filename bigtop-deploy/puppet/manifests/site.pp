@@ -13,11 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Prepare default repo by detecting the environment
-$os = downcase($operatingsystem)
+# Prepare default repo by detecting the environment automatically
+$lower_os = downcase($operatingsystem)
+# We use code name such as trusty for Ubuntu instead of release version in bigtop's binary convenience repos
 if ($operatingsystem == "Ubuntu") { $release = $lsbdistcodename } else { $release = $operatingsystemmajrelease }
-$arch = $hardwaremodel
-$default_repo = "http://bigtop-repos.s3.amazonaws.com/releases/1.0.0/${os}/${release}/${arch}"
+$default_repo = "http://bigtop-repos.s3.amazonaws.com/releases/${bigtop::default_repo::release}/${lower_os}/${release}/${hardwaremodel}"
+
 $jdk_package_name = hiera("bigtop::jdk_package_name", "jdk")
 
 stage {"pre": before => Stage["main"]}
