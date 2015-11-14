@@ -13,8 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-$default_yumrepo = "http://bigtop-repos.s3.amazonaws.com/releases/1.0.0/centos/7/x86_64"
-$default_debrepo = "http://bigtop-repos.s3.amazonaws.com/releases/1.0.0/ubuntu/trusty/x86_64"
+# Prepare default repo by detecting the environment
+$os = downcase($operatingsystem)
+if ($operatingsystem == "Ubuntu") { $release = $lsbdistcodename } else { $release = $operatingsystemmajrelease }
+$arch = $hardwaremodel
+$default_repo = "http://bigtop-repos.s3.amazonaws.com/releases/1.0.0/${os}/${release}/${arch}"
 $jdk_package_name = hiera("bigtop::jdk_package_name", "jdk")
 
 stage {"pre": before => Stage["main"]}
@@ -22,7 +25,7 @@ stage {"pre": before => Stage["main"]}
 case $operatingsystem {
     /(OracleLinux|Amazon|CentOS|Fedora|RedHat)/: {
        yumrepo { "Bigtop":
-          baseurl => hiera("bigtop::bigtop_repo_uri", $default_yumrepo),
+          baseurl => hiera("bigtop::bigtop_repo_uri", $default_repo),
           descr => "Bigtop packages",
           enabled => 1,
           gpgcheck => 0,
@@ -36,7 +39,7 @@ case $operatingsystem {
 	  ensure => present
        }
        apt::source { "Bigtop":
-          location => hiera("bigtop::bigtop_repo_uri", $default_debrepo),
+          location => hiera("bigtop::bigtop_repo_uri", $default_repo),
           release => "bigtop",
           repos => "contrib",
           ensure => present,
