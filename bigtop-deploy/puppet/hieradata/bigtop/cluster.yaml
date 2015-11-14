@@ -52,7 +52,6 @@
 #  - /data/3
 #  - /data/4
 
-bigtop::default_repo::release = "1.0.0"
 #bigtop::bigtop_repo_uri: "http://mirror.example.com/path/to/mirror/"
 
 # Test-only variable controls if user hdfs' sshkeys should be installed to allow
