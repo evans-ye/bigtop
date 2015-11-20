@@ -213,6 +213,18 @@ task "toolchain-devtools"(type:Exec,
   commandLine command
 }
 
+task "puppet-apply"(type:Exec,
+    description: "Run Puppet apply to deploy Bigtop Big Data Stack (Must have configuration readied and puppet instlled on the system).",
+    group: DEPLOY_GROUP) {
+  def command = [
+      'sudo', 'puppet', 'apply', '-d',
+      '--modulepath=bigtop-deploy/puppet/modules:/etc/puppet/modules',
+      'bigtop-deploy/puppet/manifests/site.pp'
+  ]
+  workingDir '.'
+  commandLine command
+}
+
 task "docker-provisioner"(type:Exec,
     description: 'Provision a Bigtop cluster on Docker container(s). Default to CentOS and 1 node.\nCreate a 3 node cluster:\n  $ ./gradlew -Pnum_instances=3 docker-provisioner\nRun smoke tests on 3 node cluster:\n  $ ./gradlew -Pnum_instances=3 -Prun_smoke_tests=true docker-provisioner\nSpecify configuration file (located in bigtop-deploy/vm/vagrant-puppet-docker/):\n  $ ./gradlew -Pconfig=vagrantconfig_debian.yaml docker-provisioner',
     group: DEPLOY_GROUP) {
