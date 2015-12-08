@@ -216,14 +216,14 @@ task "toolchain-devtools"(type:Exec,
 task "docker-provisioner"(type:Exec,
     description: 'Provision a Bigtop cluster on Docker container(s). Default to CentOS and 1 node.\nCreate a 3 node cluster:\n  $ ./gradlew -Pnum_instances=3 docker-provisioner\nRun smoke tests on 3 node cluster:\n  $ ./gradlew -Pnum_instances=3 -Prun_smoke_tests=true docker-provisioner\nSpecify configuration file (located in bigtop-deploy/vm/vagrant-puppet-docker/):\n  $ ./gradlew -Pconfig=vagrantconfig_debian.yaml docker-provisioner',
     group: DEPLOY_GROUP) {
-  def _config = project.hasProperty("config") ? config : "vagrantconfig.yaml"
-  def _num_instances = project.hasProperty("num_instances") ? num_instances : 1
+  def _config = config
+  def _num_instances = num_instances
   def command = [
       './docker-hadoop.sh',
       '-C', _config,
       '--create', _num_instances,
   ]
-  if ( project.hasProperty("run_smoke_tests") && run_smoke_tests ) {
+  if ( run_smoke_tests == 'true') {
     command.add("--smoke-tests")
   }
   workingDir 'bigtop-deploy/vm/vagrant-puppet-docker'
@@ -375,8 +375,8 @@ task "bigtop-slaves"(dependsOn: 'gen-gradle-home', type:Exec,
       'Example:\n  $ ./gradlew -POS=debian-8 -Pprefix=1.0.0 bigtop-slaves\n' +
       'The built image name: bigtop/slaves:1.0.0-debian-8',
     group: DOCKERBUILD_GROUP) {
-  def _prefix = project.hasProperty("prefix") ? prefix : "trunk"
-  def _OS = project.hasProperty("OS") ? OS : "centos-7"
+  def _prefix = prefix
+  def _OS = OS
   def command = [
       'docker', 'build',
       '-t', 'bigtop/slaves:' + _prefix + '-' + _OS,

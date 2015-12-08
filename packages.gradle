@@ -35,10 +35,8 @@ apply plugin: 'groovy'
 
 def PACKAGES_GROUP = 'package'
 
-final String VERBOSE = "verbose"
-final String DEPS_BUILD = "buildwithdeps"
-final boolean buildDependencies = false || System.getProperty(DEPS_BUILD) == 'true'
-final String BOM = System.getProperty('bomfile') ?: "$rootDir/bigtop.bom"
+final boolean buildDependencies = false || buildwithdeps == 'true'
+final String BOM = bomfile
 def final config  = new ConfigSlurper().parse(new URL("file:$BOM"))
 
 config.bigtop.builddir = projectDir.absolutePath + "/build"
@@ -566,7 +564,7 @@ def genTasks = { target ->
     config.bigtop.components[target].targetdeb  = config.bigtop.components[target].builddir + '/.deb'
     config.bigtop.components[target].targetrelnotes  = config.bigtop.components[target].builddir + '/.relnotes'
 
-    if (System.getProperty(VERBOSE)) {
+    if (verbose == 'true') {
       println "$target properties (explcit and derived)"
       config.bigtop.components[target].toProperties(target).each {k ,v ->
         println "$k\t= $v"
@@ -625,7 +623,7 @@ project.afterEvaluate {
   bomVersions += config.bigtop.stack.collect { // Version of the stack have different syntax
     "${toOldStyleName(it.key)}_VERSION=${it.value.version_base}"
   }
-  if (System.getProperty(VERBOSE))println "BIGTOP_BOM_VERSIONS:\n${bomVersions.join(' ')}"
+  if (verbose == 'true')println "BIGTOP_BOM_VERSIONS:\n${bomVersions.join(' ')}"
   // Putting all targets of different types into one common target
   task "srpm" (dependsOn: tasks.findAll { alltask -> alltask.name.endsWith("-srpm")}*.name,
       description: "Build all SRPM packages for the stack components",
