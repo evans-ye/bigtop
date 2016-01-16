@@ -30,11 +30,12 @@ usage() {
 create() {
     echo "\$num_instances = $1" > config.rb
     echo "\$vagrantyamlconf = \"$vagrantyamlconf\"" >> config.rb
-    docker-compose up
+    docker-compose up -d
     if [ $? -ne 0 ]; then
         echo "Docker container(s) startup failed!";
 	exit 1;
     fi
+    docker cp ../../puppet/hiera.yaml vagrantpuppetdocker_test_1:/etc/puppet/hiera.yaml
     hadoop_head_id=`docker-compose ps -q`
     hadoop_head_node=${hadoop_head_id:0:12}
     repo=$(get-yaml-config repo)
