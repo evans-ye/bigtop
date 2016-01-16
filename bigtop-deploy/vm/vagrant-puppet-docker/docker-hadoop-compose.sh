@@ -15,6 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+BIGTOP_PUPPET_DIR=../../puppet
+
 usage() {
     echo "usage: $PROG [-C file ] args"
     echo "       -C file                                   Use alternate file for vagrantconfig.yaml"
@@ -28,28 +30,35 @@ usage() {
 }
 
 create() {
-    echo "\$num_instances = $1" > config.rb
-    echo "\$vagrantyamlconf = \"$vagrantyamlconf\"" >> config.rb
-    docker-compose up -d
+    # Startup instances
+    docker-compose scale bigtop=$1
     if [ $? -ne 0 ]; then
         echo "Docker container(s) startup failed!";
 	exit 1;
     fi
-    docker cp ../../puppet/hiera.yaml vagrantpuppetdocker_test_1:/etc/puppet/hiera.yaml
-    hadoop_head_id=`docker-compose ps -q`
-    hadoop_head_node=${hadoop_head_id:0:12}
+
+    # Get the headnode FQDN
+    nodes=(`docker-compose ps -q`)
+    hadoop_head_node=`docker inspect --format {{.Config.Hostname}}.{{.Config.Domainname}}` ${nodes[0]}
+
+    # Fetch configurations form specificed yaml config file
     repo=$(get-yaml-config repo)
     components="[`echo $(get-yaml-config components) | sed 's/ /, /g'`]"
     jdk=$(get-yaml-config jdk)
     distro=$(get-yaml-config distro)
     enable_local_repo=$(get-yaml-config enable_local_repo)
-    gen-config "$hadoop_head_node" "$repo" "$components" "$jdk"
+
+    # Start provisioning
+    auto-gen-config "$hadoop_head_node" "$repo" "$components" "$jdk"
+    copy-to-instances $BIGTOP_PUPPET_DIR/hiera.yaml /etc/puppet/hiera.yaml
+    bootstrap $distro $enable_local_repo
     provision
 }
 
-gen-config() {
-    mkdir config
-    yes | cp -vr ../../puppet/hieradata config/
+auto-gen-config() {
+    echo "Bigtop Puppet configurations are shared between instances, and can be modified under config/hieradata"
+    mkdir config 2> /dev/null
+    yes | cp -vr $BIGTOP_PUPPET_DIR/hieradata config/
     cat > config/hieradata/site.yaml << EOF
 bigtop::hadoop_head_node: $1
 hadoop::hadoop_storage_dirs: [/data/1, /data/2]
@@ -59,8 +68,24 @@ bigtop::jdk_package_name: $4
 EOF
 }
 
+copy-to-instances() {
+    nodes=(`docker-compose ps -q`)
+    for node in ${nodes[*]}; do
+        docker cp  $1 $node:$2 &
+    done
+    wait
+}
+
+bootstrap() {
+    nodes=(`docker-compose ps -q`)
+    for node in ${nodes[*]}; do
+        docker exec $node bash -c "/bigtop-home/bigtop-deploy/vm/utils/setup-env-$1.sh $2" &
+    done
+    wait
+}
+
 provision() {
-    nodes=`docker-compose ps -q`
+    nodes=(`docker-compose ps -q`)
     for node in ${nodes[*]}; do
         bigtop-puppet $node &
     done
@@ -68,15 +93,16 @@ provision() {
 }
 
 smoke-tests() {
-    nodes=(`vagrant status |grep bigtop |awk '{print $1}'`)
+    nodes=(`docker-compose ps -q`)
+    hadoop_head_node=${nodes:0:12}
     smoke_test_components="`echo $(get-yaml-config smoke_test_components) | sed 's/ /,/g'`"
-    echo "/bigtop-home/bigtop-deploy/vm/utils/smoke-tests.sh \"$smoke_test_components\"" |vagrant ssh ${nodes[0]}
+    docker exec $hadoop_head_node bash -c "bash -x /bigtop-home/bigtop-deploy/vm/utils/smoke-tests.sh $smoke_test_components"
 }
 
 destroy() {
     docker-compose stop
     docker-compose rm -f
-    rm -rvf ./hosts ./config.rb
+    rm -rvf ./config
 }
 
 bigtop-puppet() {

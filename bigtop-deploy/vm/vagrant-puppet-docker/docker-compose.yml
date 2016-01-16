@@ -1,4 +1,4 @@
-test:
+bigtop:
 #    image: bigtop/deploy:hadoop_hbase
     image: bigtop/deploy:centos-6
 #    command: puppet apply -d --modulepath=/bigtop-home/bigtop-deploy/puppet/modules:/etc/puppet/modules /bigtop-home/bigtop-deploy/puppet/manifests/site.pp
@@ -6,3 +6,5 @@ test:
     volumes:
     - ../../../:/bigtop-home
     - ./config/hieradata:/etc/puppet/hieradata
+    privileged: true
+    domainname: bigtop.apache.org
