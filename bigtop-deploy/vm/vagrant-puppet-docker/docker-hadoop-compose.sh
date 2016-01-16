@@ -74,12 +74,13 @@ smoke-tests() {
 }
 
 destroy() {
-    vagrant destroy -f
+    docker-compose stop
+    docker-compose rm -f
     rm -rvf ./hosts ./config.rb
 }
 
 bigtop-puppet() {
-    docker exec $1 "puppet apply -d --modulepath=/bigtop-home/bigtop-deploy/puppet/modules:/etc/puppet/modules /bigtop-home/bigtop-deploy/puppet/manifests/site.pp"
+    docker exec $1 bash -c 'puppet apply -d --modulepath=/bigtop-home/bigtop-deploy/puppet/modules:/etc/puppet/modules /bigtop-home/bigtop-deploy/puppet/manifests/site.pp'
 }
 
 get-yaml-config() {
