@@ -39,7 +39,7 @@ create() {
 
     # Get the headnode FQDN
     nodes=(`docker-compose ps -q`)
-    hadoop_head_node=`docker inspect --format {{.Config.Hostname}}.{{.Config.Domainname}}` ${nodes[0]}
+    hadoop_head_node=`docker inspect --format {{.Config.Hostname}}.{{.Config.Domainname}} ${nodes[0]}`
 
     # Fetch configurations form specificed yaml config file
     repo=$(get-yaml-config repo)
