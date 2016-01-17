@@ -30,6 +30,11 @@ usage() {
 }
 
 create() {
+    # Create a shared /etc/hosts and hiera.yaml that will be both mounted to each container soon
+    mkdir config 2> /dev/null
+    cat /dev/null > ./config/hiera.yaml
+    cat /dev/null > ./config/hosts
+
     # Startup instances
     docker-compose scale bigtop=$1
     if [ $? -ne 0 ]; then
@@ -47,19 +52,28 @@ create() {
     jdk=$(get-yaml-config jdk)
     distro=$(get-yaml-config distro)
     enable_local_repo=$(get-yaml-config enable_local_repo)
+    generate-config "$hadoop_head_node" "$repo" "$components" "$jdk"
 
     # Start provisioning
-    auto-gen-config "$hadoop_head_node" "$repo" "$components" "$jdk"
-    copy-to-instances $BIGTOP_PUPPET_DIR/hiera.yaml /etc/puppet/hiera.yaml
+    generate-hosts
     bootstrap $distro $enable_local_repo
     provision
 }
 
-auto-gen-config() {
+generate-hosts() {
+    nodes=(`docker-compose ps -q`)
+    for node in ${nodes[*]}; do
+        echo `docker inspect --format "{{.NetworkSettings.IPAddress}} {{.Config.Hostname}}.{{.Config.Domainname}}" $node` >> ./config/hosts
+    done
+    wait
+
+}
+
+generate-config() {
     echo "Bigtop Puppet configurations are shared between instances, and can be modified under config/hieradata"
-    mkdir config 2> /dev/null
-    yes | cp -vr $BIGTOP_PUPPET_DIR/hieradata config/
-    cat > config/hieradata/site.yaml << EOF
+    cat $BIGTOP_PUPPET_DIR/hiera.yaml > ./config/hiera.yaml
+    yes | cp -vr $BIGTOP_PUPPET_DIR/hieradata ./config/
+    cat > ./config/hieradata/site.yaml << EOF
 bigtop::hadoop_head_node: $1
 hadoop::hadoop_storage_dirs: [/data/1, /data/2]
 bigtop::bigtop_repo_uri: $2

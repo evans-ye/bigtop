@@ -5,6 +5,8 @@ bigtop:
     command: sleep infinity
     volumes:
     - ../../../:/bigtop-home
+    - ./config/hiera.yaml:/etc/puppet/hiera.yaml
     - ./config/hieradata:/etc/puppet/hieradata
+    - ./config/hosts:/etc/hosts
     privileged: true
     domainname: bigtop.apache.org
