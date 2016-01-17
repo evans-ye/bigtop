@@ -1,7 +1,5 @@
 bigtop:
-#    image: bigtop/deploy:hadoop_hbase
-    image: bigtop/deploy:centos-6
-#    command: puppet apply -d --modulepath=/bigtop-home/bigtop-deploy/puppet/modules:/etc/puppet/modules /bigtop-home/bigtop-deploy/puppet/manifests/site.pp
+    image: ${DOCKER_IMAGE}
     command: sleep infinity
     volumes:
     - ../../../:/bigtop-home

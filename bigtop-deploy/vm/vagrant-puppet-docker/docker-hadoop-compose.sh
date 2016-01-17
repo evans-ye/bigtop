@@ -34,12 +34,13 @@ create() {
     mkdir config 2> /dev/null
     cat /dev/null > ./config/hiera.yaml
     cat /dev/null > ./config/hosts
+    export DOCKER_IMAGE=$(get-yaml-config docker image)
 
     # Startup instances
     docker-compose scale bigtop=$1
     if [ $? -ne 0 ]; then
         echo "Docker container(s) startup failed!";
-	exit 1;
+        exit 1;
     fi
 
     # Get the headnode FQDN
@@ -125,12 +126,14 @@ bigtop-puppet() {
 
 get-yaml-config() {
     RUBY_EXE=ruby
-    which ruby > /dev/null 2>&1
-    if [ $? -ne 0 ]; then
-	# use vagrant embedded ruby on Windows
-        RUBY_EXE=$(dirname $(which vagrant))/../embedded/bin/ruby
+    if [ $# -eq 1 ]; then
+        RUBY_SCRIPT="data = YAML::load(STDIN.read); puts data['$1'];"
+    elif [ $# -eq 2 ]; then
+        RUBY_SCRIPT="data = YAML::load(STDIN.read); puts data['$1']['$2'];"
+    else
+        echo "The yaml config retrieval function can only take 1 or 2 parameters.";
+        exit 1;
     fi
-    RUBY_SCRIPT="data = YAML::load(STDIN.read); puts data['$1'];"
     cat ${vagrantyamlconf} | $RUBY_EXE -ryaml -e "$RUBY_SCRIPT" | tr -d '\r'
 }
 

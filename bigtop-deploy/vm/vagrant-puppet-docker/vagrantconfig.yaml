@@ -14,8 +14,8 @@
 # limitations under the License.
 
 docker:
-        memory_size: "512"
-        image: "bigtop/deploy:hadoop_hbase"
+        memory_size: "2048"
+        image: "bigtop/deploy:centos-6"
 
 boot2docker:
         memory_size: "4096"
