@@ -114,6 +114,16 @@ provision() {
     wait
 }
 
+scale() {
+    export DOCKER_IMAGE=$(get-yaml-config docker image)
+    docker-compose scale bigtop=$1
+    generate-hosts
+    distro=$(get-yaml-config distro)
+    enable_local_repo=$(get-yaml-config enable_local_repo)
+    bootstrap $distro $enable_local_repo
+    provision
+}
+
 smoke-tests() {
     hadoop_head_node=${NODES:0:12}
     smoke_test_components="`echo $(get-yaml-config smoke_test_components) | sed 's/ /,/g'`"
@@ -228,6 +238,13 @@ while [ $# -gt 0 ]; do
     -s|--smoke-tests)
         smoke-tests
         shift;;
+    -S|--scale)
+        if [ $# -lt 2 ]; then
+          echo "Scale requires a number" 1>&2
+          usage
+        fi
+        scale $2
+        shift 2;;
     -h|--help)
         usage
         shift;;
