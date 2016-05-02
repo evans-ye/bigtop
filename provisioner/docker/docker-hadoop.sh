@@ -171,8 +171,15 @@ env-check() {
 
 image-prebuild() {
     DOCKER_IMAGE=$(get-yaml-config docker image)
-    PREBUILD_SRC_IMAGE=$(get-yaml-config docker prebuild_src_image
-    docker build --build-arg PREBUILD_SRC_IMAGE=$PREBUILD_SRC_IMAGE -t $DOCKER_IMAGE .
+    PREBUILD_SRC_IMAGE=$(get-yaml-config docker prebuild_src_image)
+    jdk=$(get-yaml-config jdk)
+    components="$(get-yaml-config components) $jdk"
+    distro=$(get-yaml-config distro)
+    enable_local_repo=$(get-yaml-config enable_local_repo)
+    sed "s@PREBUILD_SRC_IMAGE@${PREBUILD_SRC_IMAGE}@g" Dockerfile > Dockerfile.prebuild
+    yes | cp "install_bigtop_${distro}_stack.sh" install_bigtop_stack.sh
+    yes | cp "$BIGTOP_DEPLOY_UTILS_DIR/setup-env-${distro}.sh" setup-env.sh
+    docker build -f Dockerfile.prebuild --build-arg COMPONENTS="$components" --build-arg REPO="$enable_local_repo" -t $DOCKER_IMAGE .
 }
 
 list() {
@@ -188,6 +195,7 @@ fi
 yamlconf="config.yaml"
 
 BIGTOP_PUPPET_DIR=../../bigtop-deploy/puppet
+BIGTOP_DEPLOY_UTILS_DIR=../../bigtop-deploy/vm/utils
 if [ -e .provision_id ]; then
     PROVISION_ID=`cat .provision_id`
 fi
