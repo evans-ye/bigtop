@@ -25,6 +25,7 @@ usage() {
     echo "                                                 For example: $PROG --exec 1 bash"
     echo "                                                              $PROG --exec docker_bigtop_1 bash"
     echo "       -E, --env-check                           Check whether required tools has been installed"
+    echo "       -i, --image-prebuild                      Prebuild the image"
     echo "       -l, --list                                List out container status for the cluster"
     echo "       -p, --provision                           Deploy configuration changes"
     echo "       -s, --smoke-tests                         Run Bigtop smoke tests"
@@ -168,6 +169,12 @@ env-check() {
     ruby -v || exit 1
 }
 
+image-prebuild() {
+    DOCKER_IMAGE=$(get-yaml-config docker image)
+    PREBUILD_SRC_IMAGE=$(get-yaml-config docker prebuild_src_image
+    docker build --build-arg PREBUILD_SRC_IMAGE=$PREBUILD_SRC_IMAGE -t $DOCKER_IMAGE .
+}
+
 list() {
     docker-compose -p $PROVISION_ID ps
 }
@@ -218,6 +225,9 @@ while [ $# -gt 0 ]; do
         shift $#;;
     -E|--env-check)
         env-check
+        shift;;
+    -i|--image-prebuild)
+        image-prebuild
         shift;;
     -l|--list)
         list

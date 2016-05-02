@@ -15,7 +15,8 @@
 
 docker:
         memory_size: "4096"
-        image: "bigtop/deploy:centos-6"
+        prebuild_src_image: "bigtop/deploy:centos-6"
+        image: "bigtop/deploy:built"
 
 boot2docker:
         memory_size: "4096"
