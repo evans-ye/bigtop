@@ -26,6 +26,7 @@ usage() {
     echo "                                                              $PROG --exec docker_bigtop_1 bash"
     echo "       -E, --env-check                           Check whether required tools has been installed"
     echo "       -l, --list                                List out container status for the cluster"
+    echo "       -w, --swarm                               Create a swarm cluster to run docker containers on top of it"
     echo "       -p, --provision                           Deploy configuration changes"
     echo "       -s, --smoke-tests                         Run Bigtop smoke tests"
     echo "       -h, --help"
@@ -37,46 +38,51 @@ create() {
         echo "Cluster already exist! Run ./$PROG -d to destroy the cluster or delete .provision_id file and containers manually."
         exit 1;
     fi
-    echo "`date +'%Y%m%d_%H%M%S'`_R$RANDOM" > .provision_id
+    echo "`date +'%Y%m%d%H%M%S'`rdm$RANDOM" > .provision_id
     PROVISION_ID=`cat .provision_id`
     # Create a shared /etc/hosts and hiera.yaml that will be both mounted to each container soon
     mkdir -p config/hieradata 2> /dev/null
     cat /dev/null > ./config/hiera.yaml
     cat /dev/null > ./config/hosts
-    export DOCKER_IMAGE=$(get-yaml-config docker image)
 
     # Startup instances
-    docker-compose -p $PROVISION_ID scale bigtop=$1
+    docker-compose -p $PROVISION_ID scale $COMPOSE_INSTANCE=$1
     if [ $? -ne 0 ]; then
         echo "Docker container(s) startup failed!";
         exit 1;
     fi
+    NODES=(`docker-compose -p $PROVISION_ID ps -q`)
 
     # Get the headnode FQDN
-    NODES=(`docker-compose -p $PROVISION_ID ps -q`)
     hadoop_head_node=`docker inspect --format {{.Config.Hostname}}.{{.Config.Domainname}} ${NODES[0]}`
-
     # Fetch configurations form specificed yaml config file
     repo=$(get-yaml-config repo)
     components="[`echo $(get-yaml-config components) | sed 's/ /, /g'`]"
     jdk=$(get-yaml-config jdk)
-    distro=$(get-yaml-config distro)
-    enable_local_repo=$(get-yaml-config enable_local_repo)
     generate-config "$hadoop_head_node" "$repo" "$components" "$jdk"
-
-    # Start provisioning
-    generate-hosts
-    bootstrap $distro $enable_local_repo
+    prepare-nodes
     provision
+    echo "Create complete."
 }
 
 generate-hosts() {
-    for node in ${NODES[*]}; do
-        entry=`docker inspect --format "{{.NetworkSettings.IPAddress}} {{.Config.Hostname}}.{{.Config.Domainname}}" $node`
-        docker exec ${NODES[0]} bash -c "echo $entry >> /etc/hosts"
-    done
+    if [ -e .swarm_enabled ]; then
+        for node in ${NODES[*]}; do
+            docker exec $node bash -c "cat /dev/null > /etc/hosts"
+        done
+        for node in ${NODES[*]}; do
+            entry=`docker inspect --format "{{.NetworkSettings.Networks.$OVERLAY_NETWORK.IPAddress}} {{.Config.Hostname}}.{{.Config.Domainname}}" $node`
+            for inode in ${NODES[*]}; do
+                docker exec $inode bash -c "echo $entry >> /etc/hosts"
+            done
+        done
+    else 
+        for node in ${NODES[*]}; do
+            entry=`docker inspect --format "{{.NetworkSettings.IPAddress}} {{.Config.Hostname}}.{{.Config.Domainname}}" $node`
+            docker exec ${NODES[0]} bash -c "echo $entry >> /etc/hosts"
+        done
+    fi
     wait
-
 }
 
 generate-config() {
@@ -90,6 +96,22 @@ bigtop::bigtop_repo_uri: $2
 hadoop_cluster_node::cluster_components: $3
 bigtop::jdk_package_name: $4
 EOF
+}
+
+prepare-nodes() {
+    generate-hosts
+    if [ -e .swarm_enabled ]; then
+        for inode in ${NODES[*]}; do
+            docker exec $inode bash -c "mkdir /bigtop-home"
+        done
+        copy-to-instances ../../bigtop-deploy /bigtop-home/bigtop-deploy
+        copy-to-instances ../../bigtop_toolchain /bigtop-home/bigtop_toolchain
+        copy-to-instances ./config/hiera.yaml /etc/puppet/hiera.yaml
+        copy-to-instances ./config/hieradata /etc/puppet/hieradata
+    fi
+    distro=$(get-yaml-config distro)
+    enable_local_repo=$(get-yaml-config enable_local_repo)
+    bootstrap $distro $enable_local_repo
 }
 
 copy-to-instances() {
@@ -115,13 +137,44 @@ provision() {
 }
 
 scale() {
-    export DOCKER_IMAGE=$(get-yaml-config docker image)
-    docker-compose scale bigtop=$1
-    generate-hosts
-    distro=$(get-yaml-config distro)
-    enable_local_repo=$(get-yaml-config enable_local_repo)
-    bootstrap $distro $enable_local_repo
+    docker-compose -p $PROVISION_ID scale $COMPOSE_INSTANCE=$1
+    NODES=(`docker-compose -p $PROVISION_ID ps -q`)
+    prepare-nodes
     provision
+}
+
+swarm() {
+    kvstore
+    swarm-master
+    swarm-slave
+    touch .swarm_enabled
+    eval $(docker-machine env --swarm swarm-master)
+    docker network create --driver overlay $OVERLAY_NETWORK
+    echo "Swarm environment setup complete."
+}
+
+kvstore() {
+    echo "Creating kvstore node..."
+    DRIVER='virtualbox'
+    DRIVER_OPTS='--virtualbox-memory 256'
+    #docker-machine create -d $DRIVER $DRIVER_OPTS kvstore 
+    docker-machine create -d $DRIVER kvstore 
+    eval $(docker-machine env kvstore)
+    docker run -d -p 8500:8500 --name=consul progrium/consul -server -bootstrap
+}
+
+swarm-master() {
+    echo "Creating swarm-master node..."
+    DRIVER='virtualbox'
+    DRIVER_OPTS='--virtualbox-memory 2048'
+    docker-machine create -d $DRIVER $DRIVER_OPTS --swarm --swarm-master --swarm-discovery="consul://$(docker-machine ip kvstore):8500" --engine-opt="cluster-store=consul://$(docker-machine ip kvstore):8500" --engine-opt="cluster-advertise=eth1:2376" swarm-master
+}
+
+swarm-slave() {
+    echo "Creating swarm-slave node..."
+    DRIVER='virtualbox'
+    DRIVER_OPTS='--virtualbox-memory 2048'
+    docker-machine create -d $DRIVER $DRIVER_OPTS --swarm --swarm-discovery="consul://$(docker-machine ip kvstore):8500" --engine-opt="cluster-store=consul://$(docker-machine ip kvstore):8500" --engine-opt="cluster-advertise=eth1:2376" swarm-slave
 }
 
 smoke-tests() {
@@ -136,6 +189,13 @@ destroy() {
         docker-compose -p $PROVISION_ID rm -f
     fi
     rm -rvf ./config .provision_id
+    echo "Destroy complete."
+}
+
+destroy-swarm() {
+    docker-machine rm kvstore
+    docker-machine rm swarm-master
+    docker-machine rm swarm-slave
 }
 
 bigtop-puppet() {
@@ -190,12 +250,21 @@ fi
 
 yamlconf="config.yaml"
 
+export DOCKER_IMAGE=$(get-yaml-config docker image)
+BIGTOP_HOME_DIR=../../
 BIGTOP_PUPPET_DIR=../../bigtop-deploy/puppet
+COMPOSE_INSTANCE=bigtop_local
+OVERLAY_NETWORK=bigtop
+if [ -e .swarm_enabled ]; then
+    echo "Swarm enabled. (enable_local_repo is not available in this mode)"
+    eval $(docker-machine env --swarm swarm-master)
+    COMPOSE_INSTANCE=bigtop_swarm
+fi
 if [ -e .provision_id ]; then
     PROVISION_ID=`cat .provision_id`
 fi
 if [ -n "$PROVISION_ID" ]; then
-    NODES=`docker-compose -p $PROVISION_ID ps -q`
+    NODES=(`docker-compose -p $PROVISION_ID ps -q`)
 fi
 
 while [ $# -gt 0 ]; do
@@ -218,6 +287,10 @@ while [ $# -gt 0 ]; do
     -d|--destroy)
         destroy
         shift;;
+    -D|--destroy-all)
+        destroy
+        destroy-swarm
+        shift;;
     -e|--exec)
         if [ $# -lt 3 ]; then
           echo "exec command takes 2 parameters: 1) instance no 2) command to be executed" 1>&2
@@ -234,6 +307,9 @@ while [ $# -gt 0 ]; do
         shift;;
     -p|--provision)
         provision
+        shift;;
+    -w|--swarm)
+        swarm
         shift;;
     -s|--smoke-tests)
         smoke-tests
