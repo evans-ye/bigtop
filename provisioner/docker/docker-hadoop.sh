@@ -25,6 +25,7 @@ usage() {
     echo "                                                 For example: $PROG --exec 1 bash"
     echo "                                                              $PROG --exec docker_bigtop_1 bash"
     echo "       -E, --env-check                           Check whether required tools has been installed"
+    echo "       -i, --image-prebuild                      Prebuild the image"
     echo "       -l, --list                                List out container status for the cluster"
     echo "       -w, --swarm                               Create a swarm cluster to run docker containers on top of it"
     echo "       -p, --provision                           Deploy configuration changes"
@@ -238,6 +239,19 @@ env-check() {
     ruby -v || exit 1
 }
 
+image-prebuild() {
+    DOCKER_IMAGE=$(get-yaml-config docker image)
+    PREBUILD_SRC_IMAGE=$(get-yaml-config docker prebuild_src_image)
+    jdk=$(get-yaml-config jdk)
+    components="$(get-yaml-config components) $jdk"
+    distro=$(get-yaml-config distro)
+    enable_local_repo=$(get-yaml-config enable_local_repo)
+    sed "s@PREBUILD_SRC_IMAGE@${PREBUILD_SRC_IMAGE}@g" Dockerfile > Dockerfile.prebuild
+    yes | cp "install_bigtop_${distro}_stack.sh" install_bigtop_stack.sh
+    yes | cp "$BIGTOP_DEPLOY_UTILS_DIR/setup-env-${distro}.sh" setup-env.sh
+    docker build -f Dockerfile.prebuild --build-arg COMPONENTS="$components" --build-arg REPO="$enable_local_repo" -t $DOCKER_IMAGE .
+}
+
 list() {
     docker-compose -p $PROVISION_ID ps
 }
@@ -253,6 +267,7 @@ yamlconf="config.yaml"
 export DOCKER_IMAGE=$(get-yaml-config docker image)
 BIGTOP_HOME_DIR=../../
 BIGTOP_PUPPET_DIR=../../bigtop-deploy/puppet
+BIGTOP_DEPLOY_UTILS_DIR=../../bigtop-deploy/vm/utils
 COMPOSE_INSTANCE=bigtop_local
 OVERLAY_NETWORK=bigtop
 if [ -e .swarm_enabled ]; then
@@ -301,6 +316,9 @@ while [ $# -gt 0 ]; do
         shift $#;;
     -E|--env-check)
         env-check
+        shift;;
+    -i|--image-prebuild)
+        image-prebuild
         shift;;
     -l|--list)
         list
