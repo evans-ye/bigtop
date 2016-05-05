@@ -67,7 +67,7 @@ create() {
 
     # Start provisioning
     generate-hosts
-    bootstrap $distro $enable_local_repo
+    #bootstrap $distro $enable_local_repo
     provision
 }
 
@@ -200,7 +200,7 @@ if [ -e .provision_id ]; then
     PROVISION_ID=`cat .provision_id`
 fi
 if [ -n "$PROVISION_ID" ]; then
-    NODES=`docker-compose -p $PROVISION_ID ps -q`
+    NODES=(`docker-compose -p $PROVISION_ID ps -q`)
 fi
 
 while [ $# -gt 0 ]; do
