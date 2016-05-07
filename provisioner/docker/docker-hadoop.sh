@@ -196,6 +196,7 @@ destroy-swarm() {
     docker-machine rm kvstore
     docker-machine rm swarm-master
     docker-machine rm swarm-slave
+    rm -rvf .swarm_enabled
 }
 
 bigtop-puppet() {
