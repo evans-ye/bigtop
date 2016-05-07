@@ -284,6 +284,7 @@ while [ $# -gt 0 ]; do
           usage
         fi
 	yamlconf=$2
+        export DOCKER_IMAGE=$(get-yaml-config docker image)
         shift 2;;
     -d|--destroy)
         destroy
