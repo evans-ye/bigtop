@@ -15,8 +15,7 @@
 
 docker:
         memory_size: "4096"
-        prebuild_src_image: "bigtop-deploy-base:ubuntu-15.04-x86_64"
-        image:  "bigtop/deploy:ubuntu-14.04-prebuild"
+        image:  "bigtop/deploy:ubuntu-14.04"
 
 boot2docker:
         memory_size: "4096"

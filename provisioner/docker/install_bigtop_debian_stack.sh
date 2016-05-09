@@ -9,6 +9,7 @@
 #        apt-get install -yq $com ;;
 #    esac
 #done
+apt-get update
 while [ $# -gt 0 ]; do
     case "$1" in
     hadoop)

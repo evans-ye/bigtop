@@ -179,7 +179,7 @@ image-prebuild() {
     sed "s@PREBUILD_SRC_IMAGE@${PREBUILD_SRC_IMAGE}@g" Dockerfile > Dockerfile.prebuild
     yes | cp "install_bigtop_${distro}_stack.sh" install_bigtop_stack.sh
     yes | cp "$BIGTOP_DEPLOY_UTILS_DIR/setup-env-${distro}.sh" setup-env.sh
-    docker build -f Dockerfile.prebuild --build-arg COMPONENTS="$components" --build-arg REPO="$enable_local_repo" -t $DOCKER_IMAGE .
+    docker build --rm --no-cache -f Dockerfile.prebuild --build-arg COMPONENTS="$components" --build-arg REPO="$enable_local_repo" -t $DOCKER_IMAGE .
 }
 
 list() {
