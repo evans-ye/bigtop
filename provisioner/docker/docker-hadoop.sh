@@ -125,7 +125,9 @@ destroy() {
         docker-compose -p $PROVISION_ID stop
         docker-compose -p $PROVISION_ID rm -f
     fi
-    rm -rvf ./config .provision_id
+    rm -rvf .provision_id ./config/hieradata/site.yaml ./config/hieradata/bigtop
+    > ./config/hosts
+    > ./config/hiera.yaml
 }
 
 bigtop-puppet() {
