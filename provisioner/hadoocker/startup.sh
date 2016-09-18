@@ -3,7 +3,7 @@
 init() {
     echo "`facter ipaddress` `facter fqdn`" >> /etc/hosts
     cp /etc/puppet/hieradata/site.yaml.template /etc/puppet/hieradata/site.yaml
-    sed -i -e "s/head.node.fqdn/`hostname -f`/g" /etc/puppet/hieradata/site.yaml
+    sed -i -e "s/head.node.fqdn/`facter fqdn`/g" /etc/puppet/hieradata/site.yaml
     puppet apply -d --modulepath=/bigtop-deploy/puppet/modules:/etc/puppet/modules /bigtop-deploy/puppet/manifests/site.pp
 }
 
