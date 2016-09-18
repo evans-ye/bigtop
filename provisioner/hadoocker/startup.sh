@@ -3,7 +3,7 @@
 init() {
     cp /etc/puppet/hieradata/site.yaml.template /etc/puppet/hieradata/site.yaml
     sed -i -e 's/head.node.fqdn/`facter fqdn`/g' /etc/puppet/hieradata/site.yaml
-    puppet apply -d --modulepath=/bigtop-home/bigtop-deploy/puppet/modules:/etc/puppet/modules /bigtop-home/bigtop-deploy/puppet/manifests/site.pp
+    puppet apply -d --modulepath=/bigtop-deploy/puppet/modules:/etc/puppet/modules /bigtop-deploy/puppet/manifests/site.pp
 }
 
 usage() {
@@ -16,6 +16,7 @@ usage() {
 while [ $# -gt 0 ]; do
     case "$1" in
     -f|--foreground)
+        init
         sleep infinity
         shift 1;;
     -i|--init)
