@@ -42,6 +42,12 @@ CMD /startup.sh --foreground
 EOF
 }
 
+generate_tag() {
+    if [ -z "$TAG" ]; then
+        TAG="${OS}_`echo ${COMPONENTS//,/_} | tr -d ' '`"
+    fi
+}
+
 detect_jdk() {
     for RPM in ${RPMS[*]}; do
         [[ $OS == $RPM ]] && JDK=$RPM_JDK
@@ -54,12 +60,6 @@ detect_jdk() {
 detect_repo() {
     OS_WITH_CODE_NAME=${OS/ubuntu-14.04/ubuntu-trusty}
     REPO="http://bigtop-repos.s3.amazonaws.com/releases/${BIGTOP_VERSION}/${OS_WITH_CODE_NAME/-//}/x86_64"
-}
-
-generate_tag() {
-    if [ -z "$TAG" ]; then
-        TAG="${OS}_`echo ${COMPONENTS//,/_} | tr -d ' '`"
-    fi
 }
 
 image_config_validator() {
