@@ -1,7 +1,23 @@
 #!/bin/bash
 
-RPMS=(centos-6 centos-7 fedora-20)
-DEBS=(debian-8 ubuntu-14.04)
+source hadoocker-env.sh
+
+build() {
+    # prepare puppet recipes
+    cp -r ../../bigtop-deploy/puppet bigtop-puppet
+
+    # docker build
+    docker-compose build --force-rm --no-cache --pull
+    if [ $? -eq 0 ]; then
+        echo "-------------------------------------------------"
+        echo "Image $ACCOUNT/hadoocker:$TAG built"
+        echo "-------------------------------------------------"
+    fi
+}
+
+cleanup() {
+    rm -rf bigtop-puppet site.yaml.template Dockerfile
+}
 
 generate_config() {
     cat > site.yaml.template << EOF
@@ -26,35 +42,18 @@ CMD /startup.sh --foreground
 EOF
 }
 
-build() {
-    # prepare puppet recipes
-    cp -r ../../bigtop-deploy/puppet bigtop-puppet
-    
-    # docker build
-    docker-compose build --force-rm --no-cache --pull
-    if [ $? -eq 0 ]; then
-        echo "-------------------------------------------------"
-        echo "Image $ACCOUNT/hadoocker:$TAG built"
-        echo "-------------------------------------------------"
-    fi
-}
-
-cleanup() {
-    rm -rf bigtop-puppet site.yaml.template Dockerfile
-}
-
 detect_jdk() {
     for RPM in ${RPMS[*]}; do
-        [[ $OS == $RPM ]] && JDK="java-1.7.0-openjdk-devel.x86_64"
+        [[ $OS == $RPM ]] && JDK=$RPM_JDK
     done
     for DEB in ${DEBS[*]}; do
-        [[ $OS == $DEB ]] && JDK="openjdk-7-jdk"
+        [[ $OS == $DEB ]] && JDK=$DEB_JDK
     done
 }
 
 detect_repo() {
     OS_WITH_CODE_NAME=${OS/ubuntu-14.04/ubuntu-trusty}
-    REPO="http://bigtop-repos.s3.amazonaws.com/releases/1.0.0/${OS_WITH_CODE_NAME/-//}/x86_64"
+    REPO="http://bigtop-repos.s3.amazonaws.com/releases/${BIGTOP_VERSION}/${OS_WITH_CODE_NAME/-//}/x86_64"
 }
 
 generate_tag() {
