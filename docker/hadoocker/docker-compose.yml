@@ -1,0 +1,7 @@
+version: '2'
+services:
+  hadoocker:
+    build:
+      context: .
+      dockerfile: ${OS}/Dockerfile
+    image: ${ACCOUNT}/hadoocker:${TAG}
