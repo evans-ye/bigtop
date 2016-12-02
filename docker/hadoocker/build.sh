@@ -1,28 +1,46 @@
 #!/bin/bash
 
 RPMS=(centos-6 centos-7 fedora-20)
-DEBS=(debian-8, ubuntu-14.04)
+DEBS=(debian-8 ubuntu-14.04)
 
 generate_config() {
     cat > site.yaml.template << EOF
-    bigtop::hadoop_head_node: ${HEAD_NODE:-"head.node.fqdn"}
-    hadoop::hadoop_storage_dirs: [/data/1, /data/2]
-    bigtop::bigtop_repo_uri: ${REPO}
-    hadoop_cluster_node::cluster_components: [${COMPONENTS}]
-    bigtop::jdk_package_name: ${JDK}
+bigtop::hadoop_head_node: ${HEAD_NODE:-"head.node.fqdn"}
+hadoop::hadoop_storage_dirs: [/data/1, /data/2]
+bigtop::bigtop_repo_uri: ${REPO}
+hadoop_cluster_node::cluster_components: [${COMPONENTS}]
+bigtop::jdk_package_name: ${JDK}
+EOF
+}
+
+generate_dockerfile() {
+    cat > Dockerfile << EOF
+FROM bigtop/puppet:${OS}
+ADD startup.sh /startup.sh
+ADD bigtop-puppet /bigtop-puppet
+ADD bigtop-puppet/hiera.yaml /etc/puppet/hiera.yaml
+ADD bigtop-puppet/hieradata /etc/puppet/hieradata
+ADD site.yaml.template /etc/puppet/hieradata/site.yaml.template
+RUN /startup.sh --bootstrap
+CMD /startup.sh --foreground
 EOF
 }
 
 build() {
     # prepare puppet recipes
-    rm -rf bigtop-puppet
     cp -r ../../bigtop-deploy/puppet bigtop-puppet
     
     # docker build
     docker-compose build --force-rm --no-cache --pull
-    
-    # clear cache data
-    rm -rf bigtop-puppet site.yaml.template
+    if [ $? -eq 0 ]; then
+        echo "-------------------------------------------------"
+        echo "Image $ACCOUNT/hadoocker:$TAG built succssfully"
+        echo "-------------------------------------------------"
+    fi
+}
+
+cleanup() {
+    rm -rf bigtop-puppet site.yaml.template Dockerfile
 }
 
 detect_jdk() {
@@ -40,7 +58,7 @@ detect_repo() {
 
 generate_tag() {
     if [ -z "$TAG" ]; then
-        TAG=`echo ${COMPONENTS/,/_} | tr -d ' '`
+        TAG="$OS_`echo ${COMPONENTS/,/_} | tr -d ' '`"
     fi
 }
 
@@ -83,22 +101,22 @@ deploy_config_validator() {
 }
 
 show_image_configs() {
-    echo "--------------------------"
+    echo "-------------------------------------------------"
     echo "IMAGE CONFIGS:"
     echo "ACCOUNT    $ACCOUNT"
     echo "OS         $OS"
     echo "TAG        $TAG"
-    echo "IMAGE      $ACCOUNT/hadoocker:$OS_$TAG"
-    echo "--------------------------"
+    echo "IMAGE      $ACCOUNT/hadoocker:$TAG"
+    echo "-------------------------------------------------"
 }
 
 show_deploy_configs() {
-    echo "--------------------------"
+    echo "-------------------------------------------------"
     echo "DEPLOY CONFIGS:"
     echo "REPOSITORY $REPO"
     echo "COMPONENTS $COMPONENTS"
     echo "JDK        $JDK"
-    echo "--------------------------"
+    echo "-------------------------------------------------"
 }
 
 usage() {
@@ -154,21 +172,28 @@ while [ $# -gt 0 ]; do
     esac
 done
 
+cleanup
 generate_tag
 image_config_validator
 show_image_configs
 
-if [ -z "$FILE" ]; then    
+if [ -z "$FILE" ]; then
     detect_jdk
     detect_repo
     deploy_config_validator
     generate_config
     show_deploy_configs
 else 
-    cp -vfr $FILE site.yaml.template
+    if [ -f "$FILE" ]; then 
+        cp -vfr $FILE site.yaml.template
+    else
+        echo "$FILE not exist!"
+	exit 1
+    fi
 fi
 
-export OS
 export ACCOUNT
 export TAG
+generate_dockerfile
 build
+cleanup
