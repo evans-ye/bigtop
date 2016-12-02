@@ -55,7 +55,7 @@ image_config_validator() {
         invalid=0
     fi
     if [ -z "$TAG" ]; then
-        echo "tag unset! use -t/--tag to set tag or set components and let the system auto generate tag"
+        echo "tag unset!"
         invalid=0
     fi
     if [ $invalid -eq 0 ]; then
@@ -88,6 +88,7 @@ show_image_configs() {
     echo "ACCOUNT    $ACCOUNT"
     echo "OS         $OS"
     echo "TAG        $TAG"
+    echo "IMAGE      $ACCOUNT/hadoocker:$OS_$TAG"
     echo "--------------------------"
 }
 
@@ -102,11 +103,18 @@ show_deploy_configs() {
 
 usage() {
     echo "usage: $PROG args"
-    echo "       -a, --foreground                                   Running foreground."
-    echo "       -i, --init                                         Bootstrap the stack."
+    echo "       -a, --account                            Specify account name for image."
+    echo "       -c, --components                         Specify components to build."
+    echo "                                                    You need to specify a comma separated, quoted string."
+    echo "                                                    For example: --components \"hadoop, yarn\""
+    echo "       -f, --file                               Specify a written site.yaml config file."
+    echo "       -o, --operating-system                   Specify an OS from Bigtop supported OS list."
+    echo "                                                    RPM base: ${RPMS[*]}"
+    echo "                                                    DEB base: ${DEBS[*]}"
+    echo "       -t, --tag                                Specify tag for image."
+    echo "                                                    If not specified, this will be auto filled by specified OS and components."
     exit 1
 }
-
 
 while [ $# -gt 0 ]; do
     case "$1" in
