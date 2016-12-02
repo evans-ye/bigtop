@@ -3,5 +3,5 @@ services:
   hadoocker:
     build:
       context: .
-      dockerfile: ${OS}/Dockerfile
+      dockerfile: Dockerfile
     image: ${ACCOUNT}/hadoocker:${TAG}
