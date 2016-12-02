@@ -34,7 +34,7 @@ build() {
     docker-compose build --force-rm --no-cache --pull
     if [ $? -eq 0 ]; then
         echo "-------------------------------------------------"
-        echo "Image $ACCOUNT/hadoocker:$TAG built succssfully"
+        echo "Image $ACCOUNT/hadoocker:$TAG built"
         echo "-------------------------------------------------"
     fi
 }
@@ -53,12 +53,13 @@ detect_jdk() {
 }
 
 detect_repo() {
-    REPO="http://bigtop-repos.s3.amazonaws.com/releases/1.0.0/${OS/-//}/x86_64"
+    OS_WITH_CODE_NAME=${OS/ubuntu-14.04/ubuntu-trusty}
+    REPO="http://bigtop-repos.s3.amazonaws.com/releases/1.0.0/${OS_WITH_CODE_NAME/-//}/x86_64"
 }
 
 generate_tag() {
     if [ -z "$TAG" ]; then
-        TAG="$OS_`echo ${COMPONENTS/,/_} | tr -d ' '`"
+        TAG="$OS_`echo ${COMPONENTS//,/_} | tr -d ' '`"
     fi
 }
 
