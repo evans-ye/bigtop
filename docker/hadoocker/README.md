@@ -4,21 +4,21 @@ A big data service testing toolkit using Docker
 
 ## How to run
 
-* Make sure you have Docker installed. I've tested this using [Docker for Mac](https://docs.docker.com/docker-for-mac/)
+* Make sure you have Docker installed. We've tested this using [Docker for Mac](https://docs.docker.com/docker-for-mac/)
 
-* Run Hadoop
+* Running Hadoop
 
 ```
 docker run -p 50070:50070 bigtop/hadoocker:centos-6_hadoop
 ```
 
-* Run Spark (Standalone mode)
+* Running Spark (Standalone mode)
 
 ```
 docker run -p 8080:8080 bigtop/hadoocker:debian-8_spark
 ```
 
-* Run Hadoop + HBase
+* Running Hadoop + HBase
 
 ```
 docker run -p 50070:50070 -p 60010:60010 bigtop/hadoocker:ubuntu-14.04_hbase
@@ -37,7 +37,7 @@ docker run -p 50070:50070 -p 60010:60010 bigtop/hadoocker:ubuntu-14.04_hbase
 * Build Hadoocker image that has Hadoop and Spark provisioned
 
 ```
-./build.sh -a bigtop -o debian-8 -c spark
+./build.sh -a bigtop -o debian-8 -c "hadoop, yarn, spark"
 ```
 
 * Build Hadoocker image that has Hadoop and HBase provisioned

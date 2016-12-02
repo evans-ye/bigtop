@@ -9,8 +9,8 @@ init() {
 
 usage() {
     echo "usage: $PROG args"
-    echo "       -f, --foreground                                   Running foreground."
-    echo "       -b, --build                                        Bootstrap the stack."
+    echo "       -f, --foreground                         Running foreground."
+    echo "       -b, --build                              Bootstrap the stack."
     exit 1
 }
 
@@ -22,7 +22,6 @@ while [ $# -gt 0 ]; do
         shift;;
     -b|--bootstrap)
         init
-	killall java
 	shift;;
     *)
         echo "Unknown argument: '$1'" 1>&2
