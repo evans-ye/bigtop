@@ -8,6 +8,7 @@ build() {
 
     # docker build
     docker-compose build --force-rm --no-cache --pull
+
     if [ $? -eq 0 ]; then
         echo "-------------------------------------------------"
         echo "Image $ACCOUNT/hadoocker:$TAG built"

@@ -37,13 +37,13 @@ docker run -p 50070:50070 -p 60010:60010 bigtop/hadoocker:ubuntu-14.04_hbase
 * Build Hadoocker image that has Hadoop and Spark provisioned
 
 ```
-./build.sh -a bigtop -o debian-8 -c "hadoop, yarn, spark"
+./build.sh -a bigtop -o debian-8 -c "hadoop, spark"
 ```
 
 * Build Hadoocker image that has Hadoop and HBase provisioned
 
 ```
-./build.sh -a bigtop -o debian-8 -c "hadoop, hbase"
+./build.sh -a bigtop -o debian-8 -c "hadoop, yarn, hbase"
 ```
 
 ### Customize your Hadoop stack
