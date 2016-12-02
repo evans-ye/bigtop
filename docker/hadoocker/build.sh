@@ -58,7 +58,7 @@ detect_repo() {
 
 generate_tag() {
     if [ -z "$TAG" ]; then
-        TAG="$OS_`echo ${COMPONENTS//,/_} | tr -d ' '`"
+        TAG="${OS}_`echo ${COMPONENTS//,/_} | tr -d ' '`"
     fi
 }
 
