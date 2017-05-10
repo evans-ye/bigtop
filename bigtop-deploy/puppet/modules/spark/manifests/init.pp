@@ -135,9 +135,8 @@ class spark {
   }
 
   class common(
-      $master_url = 'yarn',
-      $master_host = $fqdn,
       $zookeeper_connection_string = undef,
+      $master_host = $fqdn,
       $master_port = 7077,
       $worker_port = 7078,
       $master_ui_port = 8080,
@@ -163,6 +162,11 @@ class spark {
       $spark_daemon_java_opts = "\"-Dspark.deploy.recoveryMode=NONE\""
     } else {
       $spark_daemon_java_opts = "\"-Dspark.deploy.recoveryMode=ZOOKEEPER -Dspark.deploy.zookeeper.url=${zookeeper_connection_string}\""
+    }
+
+    $master_url = member($deploy::roles, 'spark-on-yarn') ? {
+      true => 'yarn',
+      default => "spark://${master_host}:${master_port}"
     }
 
     file { '/etc/spark/conf/spark-env.sh':

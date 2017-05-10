@@ -72,6 +72,10 @@ $roles_map = {
     master => ["spark-master"],
     worker => ["spark-worker"],
   },
+  spark-on-yarn => {
+    worker => ["spark-on-yarn"],
+    client => ["spark-client"]
+  },
   alluxio => {
     master => ["alluxio-master"],
     worker => ["alluxio-worker"],
@@ -278,4 +282,6 @@ class node_with_components inherits hadoop_cluster_node {
   class { 'node_with_roles':
     roles => $roles,
   }
+
+  notice("Roles to deploy: ${roles}")
 }
