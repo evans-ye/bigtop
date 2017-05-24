@@ -31,64 +31,14 @@ case $operatingsystem {
 }
 
 $jdk_preinstalled = hiera("bigtop::jdk_preinstalled", false)
-$jdk_package_name = hiera("bigtop::jdk_package_name", "jdk")
+if ( ! $jdk_preinstalled ) {
+   require jdk
+}
 
 $provision_repo = hiera("bigtop::provision_repo", true)
 
-stage {"pre": before => Stage["main"]}
-
 if ($provision_repo) {
-  case $::operatingsystem {
-    /(OracleLinux|Amazon|CentOS|Fedora|RedHat)/: {
-       yumrepo { "Bigtop":
-          baseurl => hiera("bigtop::bigtop_repo_uri", $default_repo),
-          descr => "Bigtop packages",
-          enabled => 1,
-          gpgcheck => 0,
-       }
-       Yumrepo<||> -> Package<||>
-    }
-    /(Ubuntu|Debian)/: {
-       include apt
-       apt::conf { "disable_keys":
-          content => "APT::Get::AllowUnauthenticated 1;",
-	  ensure => present
-       }
-       apt::source { "Bigtop":
-          location => hiera("bigtop::bigtop_repo_uri", $default_repo),
-          release => "bigtop",
-          repos => "contrib",
-          ensure => present,
-        }
-       Apt::Source<||> -> Exec['apt_update'] -> Package<||>
-    }
-    default: {
-      notify{"WARNING: running on a neither yum nor apt platform -- make sure Bigtop repo is setup": }
-    }
-  }
-}
-
-case $::operatingsystem {
-    /Debian/: {
-      require apt
-      class { 'apt::backports':
-        pin => 500,
-      }
-      Class['apt::backports'] -> Package <||>
-
-      package { "jdk":
-        name => $jdk_package_name,
-        ensure => present,
-      }
-    }
-    default: {
-      package { "jdk":
-        name => $jdk_package_name,
-        ensure => "installed",
-        alias => "jdk",
-        noop => $jdk_preinstalled,
-     }
-   }
+   require bigtop_repo
 }
 
 node default {
