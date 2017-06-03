@@ -43,7 +43,7 @@ class flink {
 
     service { "flink-jobmanager":
       ensure => running,
-      require => Package["flink", "flink-jobmanager"],
+      require => Package["flink-jobmanager"],
       subscribe => File["/etc/flink/conf/flink-conf.yaml"],
       hasrestart => true,
       hasstatus => true
@@ -61,7 +61,7 @@ class flink {
 
     service { "flink-taskmanager":
       ensure => running,
-      require => Package["flink", "flink-taskmanager"],
+      require => Package["flink-taskmanager"],
       subscribe => File["/etc/flink/conf/flink-conf.yaml"],
       hasrestart => true,
       hasstatus => true,
