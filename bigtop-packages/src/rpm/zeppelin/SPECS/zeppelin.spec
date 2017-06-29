@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+%define __jar_repack 0
+
 %define lib_zeppelin /usr/lib/%{name}
 %define var_lib_zeppelin /var/lib/%{name}
 %define var_run_zeppelin /var/run/%{name}
@@ -52,6 +54,7 @@ Source5: zeppelin-env.sh
 Source6: zeppelin.svc
 Requires: bigtop-utils >= 0.7, hadoop-client, spark-core >= 1.5, spark-python >= 1.5
 Requires(preun): /sbin/service
+AutoReq: no
 
 %global initd_dir %{_sysconfdir}/init.d
 
