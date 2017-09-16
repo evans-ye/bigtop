@@ -19,6 +19,14 @@ class bigtop_toolchain::packages {
       # Fedora 20 and CentOS 7 or above are using mariadb, while CentOS 6 is still mysql
       if ($operatingsystem == "CentOS") and ($operatingsystemmajrelease <=6) {
         $mysql_devel="mysql-devel"
+        # BIGTOP-2884: Upgrade gcc to support C++11 on CentOS 6
+        exec { 'devtools-2_repo':
+          command => '/usr/bin/wget http://people.centos.org/tru/devtools-2/devtools-2.repo -O /etc/yum.repos.d/devtools-2.repo',
+        } -> Package <| |>
+	$cpp11_pkgs = ["devtoolset-2-gcc", "devtoolset-2-binutils", "devtoolset-2-gcc-c++"]
+        package { $cpp11_pkgs:
+          ensure => installed
+        }
       } else {
         $mysql_devel="mariadb-devel"
       }
