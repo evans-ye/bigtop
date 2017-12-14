@@ -105,7 +105,7 @@ else
     LOGGING=""
 fi
 
-export DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+export DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../../" && pwd )"
 
 set_java_home() {
 
@@ -114,7 +114,7 @@ set_java_home() {
     #####################################################################
 
     if [ -z "$JAVA_HOME" ]; then
-        source $DIR/bin/bigtop-detect-javahome
+        source /usr/lib/bigtop-utils/bigtop-detect-javahome
     fi
 }
 
@@ -238,7 +238,7 @@ print_tests() {
     if [ -d $TESTDIR ]; then
       cd $TESTDIR
 
-      for FILE in $(find -L reports/tests/classes -type f -name "*.html"); do
+      for FILE in $(find -L reports/tests/test/classes -type f -name "*.html"); do
         echo "## $TESTDIR/$FILE"
         links $FILE -dump | awk '/^Standard error$/ { stop_stdin=1 } (!stop_stdin) { print $0; } { print $0 > "/dev/stderr" }'
         echo ""
@@ -278,7 +278,7 @@ case "$ITESTS" in
 esac
 
 # CALL THE GRADLE WRAPPER TO RUN THE FRAMEWORK
-$DIR/gradlew -q --continue clean -Psmoke.tests $TEST_SETTINGS $ALL_SMOKE_TASKS $LOGGING 1>&2
+(cd $DIR; ./gradlew -q --continue clean -Psmoke.tests $TEST_SETTINGS $ALL_SMOKE_TASKS $LOGGING) 1>&2
 
 # SHOW RESULTS (HTML)
 print_tests
