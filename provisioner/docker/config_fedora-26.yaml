@@ -15,10 +15,10 @@
 
 docker:
         memory_limit: "4g"
-        image: "bigtop/puppet:trunk-debian-8"
+        image: "bigtop/puppet:trunk-fedora-26"
 
-repo: "http://repos.bigtop.apache.org/releases/1.2.1/debian/8/x86_64"
-distro: debian
+repo: "http://repos.bigtop.apache.org/releases/1.2.1/fedora/25/x86_64"
+distro: centos
 components: [hdfs, yarn, mapreduce]
 enable_local_repo: false
 smoke_test_components: [hdfs, yarn, mapreduce]
