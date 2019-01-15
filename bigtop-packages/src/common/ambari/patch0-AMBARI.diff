@@ -1,5 +1,5 @@
 diff --git a/contrib/management-packs/odpi-ambari-mpack/pom.xml b/contrib/management-packs/odpi-ambari-mpack/pom.xml
-index 7b97e65..49c37f3 100644
+index 7b97e65240..49c37f3362 100644
 --- a/contrib/management-packs/odpi-ambari-mpack/pom.xml
 +++ b/contrib/management-packs/odpi-ambari-mpack/pom.xml
 @@ -84,6 +84,7 @@
@@ -10,4 +10,3 @@ index 7b97e65..49c37f3 100644
            <tarLongFileMode>gnu</tarLongFileMode>
            <descriptors>
              <descriptor>src/main/assemblies/odpi-ambari-mpack.xml</descriptor>
-
