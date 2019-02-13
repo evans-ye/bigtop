@@ -39,7 +39,12 @@ start() {
   su -s /bin/bash $TARGET_USER -c "$EXEC_PATH --config '$CONF_DIR' start $DAEMON_FLAGS"
 
   # Some processes are slow to start
-  sleep $SLEEP_TIME
+  WAIT_TIMES=0
+  until ps -A -o pid,command | grep -i "[j]ava" | grep $KEYWORD || [ $WAIT_TIMES -eq 5 ]; do
+      (( WAIT_TIMES++ ))
+      sleep 1
+  done
+  echo `ps -A -o pid,command | grep -i "[j]ava" | grep $KEYWORD | awk '{print $1}'` > $PIDFILE 
   checkstatusofproc
   RETVAL=$?
 
