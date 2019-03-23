@@ -62,8 +62,10 @@ def ifExists = { url ->
   if (url == null) return
   URLConnection uCon = new URL(url).openConnection()
   try {
+    println "Trying to connect to $url"
     return (uCon as HttpURLConnection).responseCode == 200
   } catch(Exception e) {
+    println "Failed to connect to $url caused by" + e.getMessage()
     return false
   }
 }    
